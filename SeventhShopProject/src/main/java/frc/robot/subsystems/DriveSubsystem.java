@@ -1,11 +1,13 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Value;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.units.measure.Dimensionless;
+import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
@@ -43,6 +45,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void setMotorSpeed(Dimensionless speed, Side whichMotor) {
         getMotorObject(whichMotor).set(speed.in(Value));
+
+        System.out.println(speed.in(Percent));
     }
 
     public Dimensionless getMotorSpeed(Side whichMotor) {

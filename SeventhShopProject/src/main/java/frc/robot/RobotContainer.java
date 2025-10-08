@@ -55,8 +55,8 @@ public class RobotContainer {
    */
   private void configureBindings() {
     m_driveSubsystem.setDefaultCommand(new RunCommand(() -> {
-      this.joyConLeft = m_driverController.getLeftY(); // Left Y-axis for PS5 controller
-      this.joyConRight = m_driverController.getRightX(); // Right Y-axis for PS5 controller
+      this.joyConLeft = m_driverController.getLeftY();
+      this.joyConRight = m_driverController.getRightY();
 
       m_driveSubsystem.setMotorSpeed(Value.of(joyConLeft), DriveSubsystem.Side.LEFT);
       m_driveSubsystem.setMotorSpeed(Value.of(joyConRight), DriveSubsystem.Side.RIGHT);
