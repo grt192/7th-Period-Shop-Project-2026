@@ -10,40 +10,35 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class TankDriveSubsystem extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
-  public TankDriveSubsystem() {}
+  
+  private WPI_TalonSRX lF = WPI_TalonSRX(a);
+  private WPI_TalonSRX lB = WPI_TalonSRX(a);
+  private WPI_TalonSRX rF = WPI_TalonSRX(a);
+  private WPI_TalonSRX rB = WPI_TalonSRX(a);
+  //replace the 'a' with numbers
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+  public TankDriveSubsystem() {
+
+    lB.coast(NeutralMode.Coast);
+    rB.coast(NeutralMode.Coast);
+    lF.coast(NeutralMode.Coast);
+    rF.coast(NeutralMode.Coast);
+    lB.follow(lF);
+    rB.follow(rF);
+
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  public void setMotors(double left, double right){
+    rF.set(right);
+    lF.set(-left);
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  public void brake(){
+    rF.setNeutralMode(NeutralMode.Brake);
+    lF.setNeutralMode(NeutralMode.Brake);
   }
 
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
+  //these methods were more or less taken from the other tankDrive system. The specific functions were copied too, as I didnt
+  //feel like searching for and reading documentation.
+  
 }
