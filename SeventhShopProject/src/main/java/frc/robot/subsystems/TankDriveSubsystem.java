@@ -11,18 +11,18 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class TankDriveSubsystem extends SubsystemBase {
   
-  private WPI_TalonSRX lF = WPI_TalonSRX(a);
-  private WPI_TalonSRX lB = WPI_TalonSRX(a);
-  private WPI_TalonSRX rF = WPI_TalonSRX(a);
-  private WPI_TalonSRX rB = WPI_TalonSRX(a);
+  private WPI_TalonSRX lF = new WPI_TalonSRX(2);
+  private WPI_TalonSRX lB = new WPI_TalonSRX(1);
+  private WPI_TalonSRX rF = new WPI_TalonSRX(18);
+  private WPI_TalonSRX rB = new WPI_TalonSRX(4);
   //replace the 'a' with numbers
 
   public TankDriveSubsystem() {
 
-    lB.coast(NeutralMode.Coast);
-    rB.coast(NeutralMode.Coast);
-    lF.coast(NeutralMode.Coast);
-    rF.coast(NeutralMode.Coast);
+    lB.setNeutralMode(NeutralMode.Coast);
+    rB.setNeutralMode(NeutralMode.Coast);
+    lF.setNeutralMode(NeutralMode.Coast);
+    rF.setNeutralMode(NeutralMode.Coast);
     lB.follow(lF);
     rB.follow(rF);
 
@@ -33,9 +33,22 @@ public class TankDriveSubsystem extends SubsystemBase {
     lF.set(-left);
   }
 
-  public void brake(){
+  public void setBrakeMode(boolean b){
     rF.setNeutralMode(NeutralMode.Brake);
     lF.setNeutralMode(NeutralMode.Brake);
+  }
+
+  public void altDrive(double lA, double rA){
+    if (lA == 0 && rA != 0) {
+      // Spin in place
+      setMotors(rA, -rA);
+    } else if (lA != 0 && rA == 0) {
+      // Move straight
+      setMotors(lA, lA);
+    } else {
+      // mix
+      setMotors((lA - rA) / 2.0, (lA + rA) / 2.0);
+    }
   }
 
   //these methods were more or less taken from the other tankDrive system. The specific functions were copied too, as I didnt
