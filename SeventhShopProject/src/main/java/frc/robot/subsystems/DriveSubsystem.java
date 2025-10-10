@@ -29,10 +29,11 @@ public class DriveSubsystem extends SubsystemBase {
 
         leftFront.setNeutralMode(NeutralMode.Coast);
         rightFront.setNeutralMode(NeutralMode.Coast);
-        leftBack.setNeutralMode(NeutralMode.Brake);
-        rightBack.setNeutralMode(NeutralMode.Brake);
+        leftBack.setNeutralMode(NeutralMode.Coast);
+        rightBack.setNeutralMode(NeutralMode.Coast);
 
         leftFront.setInverted(true);
+        leftBack.setInverted(true);
     }
 
     private WPI_TalonSRX getMotorObject(Side whichMotor) {

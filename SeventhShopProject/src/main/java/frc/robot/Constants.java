@@ -26,6 +26,6 @@ public final class Constants {
     public static final int left_back_motor_id = 1;
 
     public static final int right_front_motor_id = 18;
-    public static final int right_back_motor_id = 4;
+    public static final int right_back_motor_id = 0;
   }
 }
