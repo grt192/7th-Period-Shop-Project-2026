@@ -21,11 +21,7 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
-  public static final class DriveConstants {
-    public static final int left_front_motor_id = 2;
-    public static final int left_back_motor_id = 1;
-
-    public static final int right_front_motor_id = 18;
-    public static final int right_back_motor_id = 0;
+  public static final class CANConstants {
+    
   }
 }
