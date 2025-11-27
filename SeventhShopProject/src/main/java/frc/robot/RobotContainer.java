@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.TankDriveCommand;
 import frc.robot.subsystems.TankDriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
@@ -17,10 +18,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   
   private final TankDriveSubsystem m_exampleSubsystem = new TankDriveSubsystem();
+  private IntakeSubsystem intake = new IntakeSubsystem();
 
   private final CommandPS5Controller m_driverController = new CommandPS5Controller(0);
+
   public double joyConLeft = 0;
   public double joyConRight = 0;
+  public boolean l1;
+  public boolean r1;
   // joy Con and PS5 methods copied from previous years tank drive
 
   
@@ -36,6 +41,13 @@ public class RobotContainer {
       this.joyConRight = m_driverController.getRightX(); // Right Y-axis for PS5 controller
       m_exampleSubsystem.altDrive(joyConLeft, joyConRight);
     }, m_exampleSubsystem));
+
+    intake.setDefaultCommand(new RunCommand(() -> {
+      this.l1 = m_driverController.L1().getAsBoolean(); // Left Y-axis for PS5 controller
+      this.r1 = m_driverController.R1().getAsBoolean();
+      intake.moveArm(l1, r1);
+    }, intake));
+
   }
 
   //this configure bindings was directly copied and pasted and altered at the parameters.

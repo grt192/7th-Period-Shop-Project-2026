@@ -6,42 +6,71 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.CANdi;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 
-public class ExampleSubsystem extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
-  public ExampleSubsystem() {}
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+public class IntakeSubsystem extends SubsystemBase {
+  
+  private TalonFX leverMotor = new TalonFX( /*insert numer */ 3);
+  private CANdi limit = new CANdi(/*insert number */ 2);
+  private boolean setYet = false;
+  private double upperLim = /*decide val */ 50; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
+  private double invert = 1; //to reverse direction, just change 1 to -1
+  private boolean goingUp = false;
+
+  
+  public IntakeSubsystem() {
+    leverMotor.setPosition(0.0);
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  public void manual(boolean left, boolean right){
+    if(left && !right ){
+      leverMotor.set(-0.1*invert);
+    }else if(!left && right){
+      leverMotor.set(0.1*invert);
+    }else{
+      leverMotor.set(0.0*invert);
+    }
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  public void auto(boolean left, boolean right){
+    if(left && !right ){  
+        leverMotor.set(-0.1*invert);
+      
+    }else if(!left && right){
+        if(leverMotor.getPosition().getValueAsDouble() < upperLim){// check sign on upperLim
+          leverMotor.set(0.1*invert);
+        }
+      
+    }else{
+      leverMotor.set(0.0);
+    }
+
   }
 
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
+  public void moveArm(boolean left, boolean right){
+    if(!setYet){
+      manual(left, right);
+    }
+
+    if(limit.getS1Closed().refresh().getValue()){ //check is bool is true or false when pressed
+      setYet = true;
+      leverMotor.setPosition(0.0); 
+      leverMotor.set(0.0);
+      upperLim = 2;                                       //check signage and number
+    }
+
+    if(leverMotor.getPosition().getValueAsDouble() > upperLim){//check signage
+      leverMotor.set(0.0);
+    }
+
+    if(setYet){
+      auto(left, right);
+    }
+
   }
+
+
 }
