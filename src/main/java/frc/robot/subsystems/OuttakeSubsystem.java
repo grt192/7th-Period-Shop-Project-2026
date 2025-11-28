@@ -99,7 +99,7 @@ public class OuttakeSubsystem extends SubsystemBase {
             new CurrentLimitsConfigs()
                 .withStatorCurrentLimitEnable(true)
                 .withStatorCurrentLimit(OuttakeConstants.currentLimit));
-    motor.getConfigurator().apply(motorConfig);
+    StatusCode motorConfigStatus = motor.getConfigurator().apply(motorConfig);
 
     Angle pivotDiscontinuityPoint = ((OuttakeConstants.lowerLimitAngle.plus(OuttakeConstants.homeAngle)).div(2))
         .plus(Rotations.of(0.5));
@@ -107,8 +107,11 @@ public class OuttakeSubsystem extends SubsystemBase {
     encoderConfig = new CANcoderConfiguration().withMagnetSensor(new MagnetSensorConfigs()
         .withAbsoluteSensorDiscontinuityPoint(pivotDiscontinuityPoint)
         .withMagnetOffset(OuttakeConstants.encoderMagnetOffset));
-    pivotEncoder.getConfigurator().apply(encoderConfig);
+    StatusCode encoderStatusCode = pivotEncoder.getConfigurator().apply(encoderConfig);
 
+    if (motorConfigStatus != StatusCode.OK || encoderStatusCode != StatusCode.OK) {
+      throw new IllegalStateException("Haha ur fucked");
+    }
     motorKt = motor.getMotorKT().getValue();
   }
 
