@@ -39,7 +39,7 @@ public class DriveSubsystem extends SubsystemBase {
     private DifferentialDrive robotDriveController;
 
     private SimpleMotorFeedforward velocityFeedforward = new SimpleMotorFeedforward(DriveConstants.kS,
-            DriveConstants.kV);
+            1 / DriveConstants.kV);
 
     private final AngularAccelerationUnit RPMPerSecond = RPM.per(Second);
 
@@ -54,6 +54,7 @@ public class DriveSubsystem extends SubsystemBase {
                 .idleMode(IdleMode.kBrake).closedLoop
                 .pidf(DriveConstants.kP, DriveConstants.kI, DriveConstants.kD, 1 / DriveConstants.kV).maxMotion
                 .maxAcceleration(DriveConstants.maxAcceleration.in(RPMPerSecond))
+                .maxVelocity(DriveConstants.maxVelocity.in(RPM))
                 .allowedClosedLoopError(DriveConstants.allowedError);
         rightLeaderConfig
                 .apply(globalConfig)
