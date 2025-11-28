@@ -74,8 +74,9 @@ public class DriveSubsystem extends SubsystemBase {
         leftLeaderController = leftLeader.getClosedLoopController();
         rightLeaderController = rightLeader.getClosedLoopController();
 
-        robotDriveController = new DifferentialDrive(leftOutput -> setLeftSpeed(RPM.of(leftOutput)),
-                rightOutput -> setRightSpeed(RPM.of(rightOutput)));
+        robotDriveController = new DifferentialDrive(
+                leftOutput -> setLeftSpeed(DriveConstants.maxWheelVelocity.times(leftOutput)),
+                rightOutput -> setRightSpeed(DriveConstants.maxWheelVelocity.times(rightOutput)));
     }
 
     private void setLeftSpeed(AngularVelocity desiredVelocity) {
