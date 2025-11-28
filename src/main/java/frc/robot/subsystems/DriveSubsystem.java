@@ -8,6 +8,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.function.DoubleSupplier;
@@ -55,7 +56,9 @@ public class DriveSubsystem extends SubsystemBase {
 
         globalConfig
                 .smartCurrentLimit((int) DriveConstants.currentLimit.in(Amps))
-                .idleMode(IdleMode.kBrake).closedLoop
+                .idleMode(IdleMode.kBrake)
+                .closedLoopRampRate(DriveConstants.closedLoopRampRate.in(Seconds))
+                .openLoopRampRate(DriveConstants.openLoopRampRate.in(Seconds)).closedLoop
                 .pid(DriveConstants.kP, DriveConstants.kI, DriveConstants.kD).maxMotion
                 .maxAcceleration(DriveConstants.maxAcceleration.in(RPMPerSecond))
                 .maxVelocity(DriveConstants.maxVelocity.in(RPM))

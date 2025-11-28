@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
 
@@ -16,6 +17,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Time;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -54,6 +56,8 @@ public final class Constants {
     public static final AngularVelocity maxMotorVelocity = RPM.of(3000);
 
     public static final Current currentLimit = Amps.of(50);
+    public static final Time closedLoopRampRate = Seconds.of(5);
+    public static final Time openLoopRampRate = Seconds.of(5);
   }
 
   public static final class OuttakeConstants {
