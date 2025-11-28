@@ -51,7 +51,7 @@ public final class Constants {
     public static final AngularAcceleration maxAcceleration = RotationsPerSecondPerSecond.of(150);
     public static final AngularVelocity maxVelocity = RPM.of(3000);
     public static final double allowedError = 0.0; // lowk idk the units
-    public static final AngularVelocity maxWheelVelocity = RPM.of(3000);
+    public static final AngularVelocity maxMotorSpeed = RPM.of(3000);
 
     public static final Current currentLimit = Amps.of(50);
   }

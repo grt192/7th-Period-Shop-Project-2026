@@ -52,7 +52,7 @@ public class DriveSubsystem extends SubsystemBase {
         globalConfig
                 .smartCurrentLimit((int) DriveConstants.currentLimit.in(Amps))
                 .idleMode(IdleMode.kBrake).closedLoop
-                .pidf(DriveConstants.kP, DriveConstants.kI, DriveConstants.kD, 1 / DriveConstants.kV).maxMotion
+                .pid(DriveConstants.kP, DriveConstants.kI, DriveConstants.kD).maxMotion
                 .maxAcceleration(DriveConstants.maxAcceleration.in(RPMPerSecond))
                 .maxVelocity(DriveConstants.maxVelocity.in(RPM))
                 .allowedClosedLoopError(DriveConstants.allowedError);
@@ -76,8 +76,8 @@ public class DriveSubsystem extends SubsystemBase {
         rightLeaderController = rightLeader.getClosedLoopController();
 
         robotDriveController = new DifferentialDrive(
-                leftOutput -> setLeftSpeed(DriveConstants.maxWheelVelocity.times(leftOutput)),
-                rightOutput -> setRightSpeed(DriveConstants.maxWheelVelocity.times(rightOutput)));
+                leftOutput -> setLeftSpeed(DriveConstants.maxMotorSpeed.times(leftOutput)),
+                rightOutput -> setRightSpeed(DriveConstants.maxMotorSpeed.times(rightOutput)));
     }
 
     private void setLeftSpeed(AngularVelocity desiredVelocity) {
