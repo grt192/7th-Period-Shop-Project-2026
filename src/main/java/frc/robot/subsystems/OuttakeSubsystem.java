@@ -126,12 +126,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   }
 
   private boolean getHardStopValue() {
-    ReverseLimitValue curSwitchValue = motor.getReverseLimit().getValue();
-    if (curSwitchValue == ReverseLimitValue.ClosedToGround) {
-      return true;
-    } else {
-      return false;
-    }
+    return motor.getReverseLimit().getValue() == ReverseLimitValue.ClosedToGround;
   }
 
   private Torque getTorque() {
