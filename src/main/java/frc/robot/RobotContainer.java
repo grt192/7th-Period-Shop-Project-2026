@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.Set;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
@@ -45,10 +47,8 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    m_driverController.povUp()
-        .onTrue(Commands.runOnce(() -> System.out.println("Step Up")).andThen(m_outtakeSubsystem.stepUp()));
-    m_driverController.povDown()
-        .onTrue(Commands.runOnce(() -> System.out.println("Step Down")).andThen(m_outtakeSubsystem.stepDown()));
+    m_driverController.povUp().onTrue(m_outtakeSubsystem.stepUp());
+    m_driverController.povDown().onTrue(m_outtakeSubsystem.stepDown());
   }
 
   public Command getAutonomousCommand() {

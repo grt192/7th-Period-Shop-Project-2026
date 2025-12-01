@@ -175,6 +175,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   }
 
   private void setPosition(Angle posAngle) {
+    zeroReported = false;
     if (posAngle.gt(OuttakeConstants.forwardSoftLimitAngle)) {
       posAngle = OuttakeConstants.forwardSoftLimitAngle;
     } else if (posAngle.lt(OuttakeConstants.reverseSoftLimitAngle)) {
@@ -190,15 +191,23 @@ public class OuttakeSubsystem extends SubsystemBase {
     return motor.getVelocity().getValue();
   }
 
+  boolean zeroReported = false;
+
   private void setVelocity(AngularVelocity setVelocity) {
     if (getHardStopValue() && setVelocity.in(RPM) < 0) {
       setVelocity = RPM.of(0);
     } else if (getPosition().gt(OuttakeConstants.forwardSoftLimitAngle) && setVelocity.in(RPM) > 0) {
       setVelocity = RPM.of(0);
     }
-
-    System.out.print("Velocity: ");
-    System.out.println(setVelocity.toLongString());
+    if (!setVelocity.isEquivalent(RPM.of(0))) {
+      zeroReported = false;
+      System.out.print("Velocity: ");
+      System.out.println(setVelocity.toLongString());
+    } else if (!zeroReported) {
+      zeroReported = true;
+      System.out.print("Velocity: ");
+      System.out.println(setVelocity.toLongString());
+    }
     motor.setControl(velRequest.withVelocity(setVelocity));
   }
 
@@ -254,16 +263,16 @@ public class OuttakeSubsystem extends SubsystemBase {
     System.out.print(currentPos.toLongString());
     System.out.print(" ");
     if (currentPos.lt(OuttakeConstants.bottomBoxAngle) && !atPosition(OuttakeConstants.bottomBoxAngle)) {
-      System.out.print(1);
+      System.out.println(1);
       return goToBottomBox(true);
     } else if (currentPos.lt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
-      System.out.print(2);
+      System.out.println(2);
       return goToTopBox(true);
     } else if (currentPos.lt(OuttakeConstants.homeAngle) && !atPosition(OuttakeConstants.homeAngle)) {
-      System.out.print(3);
+      System.out.println(3);
       return goToHome(true);
     } else {
-      System.out.print(4);
+      System.out.println(4);
       return goToBottomBox(true);
     }
   }
@@ -273,16 +282,16 @@ public class OuttakeSubsystem extends SubsystemBase {
     System.out.print(currentPos.toLongString());
     System.out.print(" ");
     if (currentPos.gt(OuttakeConstants.homeAngle) && !atPosition(OuttakeConstants.homeAngle)) {
-      System.out.print(5);
+      System.out.println(5);
       return goToHome(true);
     } else if (currentPos.gt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
-      System.out.print(6);
+      System.out.println(6);
       return goToTopBox(true);
     } else if (currentPos.gt(OuttakeConstants.bottomBoxAngle) && !atPosition(OuttakeConstants.bottomBoxAngle)) {
-      System.out.print(7);
+      System.out.println(7);
       return goToBottomBox(true);
     } else {
-      System.out.print(8);
+      System.out.println(8);
       return goToHome(true);
     }
   }
@@ -355,32 +364,31 @@ public class OuttakeSubsystem extends SubsystemBase {
   // true,
   // 0);
 
-  // @Override
-  // public void simulationPeriodic() {
-  // var talonFXSim = motor.getSimState();
-  // var cancoderSim = pivotEncoder.getSimState();
+  @Override
+  public void simulationPeriodic() {
+    var talonFXSim = motor.getSimState();
+    // var cancoderSim = pivotEncoder.getSimState();
 
-  // talonFXSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-  // var motorVoltage = talonFXSim.getMotorVoltageMeasure();
+    // talonFXSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+    // var motorVoltage = talonFXSim.getMotorVoltageMeasure();
 
-  // m_armSim.setInputVoltage(motorVoltage.in(Volts));
-  // m_armSim.update(0.020);
+    // m_armSim.setInputVoltage(motorVoltage.in(Volts));
+    // m_armSim.update(0.020);
 
-  // Angle armAngle = Radians.of(m_armSim.getAngleRads());
-  // Angle motorAngle = armAngle.times(OuttakeConstants.mechGearRatio);
+    // Angle armAngle = Radians.of(m_armSim.getAngleRads());
+    // Angle motorAngle = armAngle.times(OuttakeConstants.mechGearRatio);
 
-  // AngularVelocity armVelocity =
-  // RadiansPerSecond.of(m_armSim.getVelocityRadPerSec());
-  // AngularVelocity motorVelocity =
-  // armVelocity.times(OuttakeConstants.mechGearRatio);
+    // AngularVelocity armVelocity =
+    // RadiansPerSecond.of(m_armSim.getVelocityRadPerSec());
+    // AngularVelocity motorVelocity =
+    // armVelocity.times(OuttakeConstants.mechGearRatio);
 
-  // cancoderSim.setRawPosition(armAngle);
-  // cancoderSim.setVelocity(armVelocity);
+    // cancoderSim.setRawPosition(armAngle);
+    // cancoderSim.setVelocity(armVelocity);
 
-  // talonFXSim.setRawRotorPosition(motorAngle);
-  // talonFXSim.setRotorVelocity(motorVelocity);
+    // talonFXSim.setRawRotorPosition(motorAngle);
+    // talonFXSim.setRotorVelocity(motorVelocity);
 
-  // talonFXSim.setReverseLimit(m_armSim.hasHitLowerLimit());
-
-  // }
+    talonFXSim.setReverseLimit(getPosition().lte(OuttakeConstants.reverseSoftLimitAngle));
+  }
 }
