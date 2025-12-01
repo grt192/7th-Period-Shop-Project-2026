@@ -23,13 +23,13 @@ public class RobotContainer {
 
     m_outtakeSubsystem.setDefaultCommand(
         m_outtakeSubsystem.VelocityControl(
-            () -> m_driverController.getL2Axis(),
-            () -> m_driverController.getR2Axis()));
+            () -> -m_driverController.getL2Axis(),
+            () -> -m_driverController.getR2Axis()));
 
     m_driveSubsystem.setDefaultCommand(
         m_driveSubsystem.tankDrive(
-            () -> m_driverController.getLeftY(),
-            () -> m_driverController.getRightY()));
+            () -> -m_driverController.getLeftY(),
+            () -> -m_driverController.getRightY()));
   }
 
   private void configureBindings() {
