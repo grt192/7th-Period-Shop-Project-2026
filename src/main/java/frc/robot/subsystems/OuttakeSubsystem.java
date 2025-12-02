@@ -53,24 +53,29 @@ import frc.robot.Constants.OuttakeConstants;
 public class OuttakeSubsystem extends SubsystemBase {
 
   private final TalonFX motor = new TalonFX(OuttakeConstants.motorID, "can");
-  private final TalonFXConfiguration motorConfig;
-  private final Slot0Configs positionPIDConfigs;
-  private final Slot1Configs velocityPIDConfigs;
-
   final PositionTorqueCurrentFOC posRequest = new PositionTorqueCurrentFOC(Rotations.of(0)).withSlot(0);
   final VelocityTorqueCurrentFOC velRequest = new VelocityTorqueCurrentFOC(RPM.of(0)).withSlot(1);
   final VoltageOut voltageRequest = new VoltageOut(0.0);
-
   private Per<TorqueUnit, CurrentUnit> motorKt;
 
   private final CANcoder pivotEncoder = new CANcoder(OuttakeConstants.encoderID, "can");
-  private final CANcoderConfiguration encoderConfig;
 
   private final CANdi hardstop = new CANdi(OuttakeConstants.CANdiID, "can");
-  private final CANdiConfiguration candiConfig;
 
   public OuttakeSubsystem() {
-    positionPIDConfigs = new Slot0Configs()
+    StatusCode motorConfigStatus = configureMotors();
+    StatusCode encoderStatusCode = configureEncoder();
+    StatusCode candiConfigStatus = configureCandi();
+
+    if (motorConfigStatus != StatusCode.OK || encoderStatusCode != StatusCode.OK
+        || candiConfigStatus != StatusCode.OK) {
+      throw new IllegalStateException("Haha ur fucked");
+    }
+    motorKt = motor.getMotorKT().getValue();
+  }
+
+  private StatusCode configureMotors() {
+    final Slot0Configs positionPIDConfigs = new Slot0Configs()
         .withKG(OuttakeConstants.pos_kG)
         .withKS(OuttakeConstants.pos_kS)
         .withKP(OuttakeConstants.pos_kP)
@@ -78,7 +83,8 @@ public class OuttakeSubsystem extends SubsystemBase {
         .withKD(OuttakeConstants.pos_kD)
         .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign)
         .withGravityType(GravityTypeValue.Arm_Cosine);
-    velocityPIDConfigs = new Slot1Configs()
+
+    final Slot1Configs velocityPIDConfigs = new Slot1Configs()
         .withKG(OuttakeConstants.vel_kG)
         .withKS(OuttakeConstants.vel_kS)
         .withKP(OuttakeConstants.vel_kP)
@@ -87,7 +93,7 @@ public class OuttakeSubsystem extends SubsystemBase {
         .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign)
         .withGravityType(GravityTypeValue.Arm_Cosine);
 
-    motorConfig = new TalonFXConfiguration()
+    final TalonFXConfiguration motorConfig = new TalonFXConfiguration()
         .withFeedback(
             new FeedbackConfigs()
                 .withFeedbackRemoteSensorID(pivotEncoder.getDeviceID())
@@ -115,29 +121,27 @@ public class OuttakeSubsystem extends SubsystemBase {
             new CurrentLimitsConfigs()
                 .withStatorCurrentLimitEnable(true)
                 .withStatorCurrentLimit(OuttakeConstants.currentLimit));
-    StatusCode motorConfigStatus = motor.getConfigurator().apply(motorConfig);
+    return motor.getConfigurator().apply(motorConfig);
+  }
 
+  private StatusCode configureEncoder() {
     Angle pivotDiscontinuityPoint = ((OuttakeConstants.reverseSoftLimitAngle
         .plus(OuttakeConstants.forwardSoftLimitAngle))
         .div(2))
         .plus(Rotations.of(0.5));
 
-    encoderConfig = new CANcoderConfiguration().withMagnetSensor(new MagnetSensorConfigs()
+    final CANcoderConfiguration encoderConfig = new CANcoderConfiguration().withMagnetSensor(new MagnetSensorConfigs()
         .withAbsoluteSensorDiscontinuityPoint(pivotDiscontinuityPoint)
         .withMagnetOffset(OuttakeConstants.encoderMagnetOffset));
-    StatusCode encoderStatusCode = pivotEncoder.getConfigurator().apply(encoderConfig);
+    return pivotEncoder.getConfigurator().apply(encoderConfig);
+  }
 
-    candiConfig = new CANdiConfiguration();
+  private StatusCode configureCandi() {
+    final CANdiConfiguration candiConfig = new CANdiConfiguration();
     candiConfig.DigitalInputs
         .withS1FloatState(S1FloatStateValue.PullHigh)
         .withS1CloseState(S1CloseStateValue.CloseWhenLow);
-    StatusCode candiConfigStatus = hardstop.getConfigurator().apply(candiConfig);
-
-    if (motorConfigStatus != StatusCode.OK || encoderStatusCode != StatusCode.OK
-        || candiConfigStatus != StatusCode.OK) {
-      throw new IllegalStateException("Haha ur fucked");
-    }
-    motorKt = motor.getMotorKT().getValue();
+    return hardstop.getConfigurator().apply(candiConfig);
   }
 
   private boolean getHardStopValue() {
