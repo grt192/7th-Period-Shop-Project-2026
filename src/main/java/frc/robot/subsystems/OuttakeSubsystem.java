@@ -27,7 +27,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   // Motor Kt (Nm/A)
   private Per<TorqueUnit, CurrentUnit> motorKt;
 
-  // Motor Object (Kraken x60)
+  // TalonFX Motor Object (Kraken x60)
   private final TalonFX motor = new TalonFX(OuttakeConstants.motorID, "can");
 
   // TalonFX Control Requests (utilizing FOC)
@@ -38,7 +38,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   // Encoder Object (WCP ThroughBore Encoder Powered by CANcoder)
   private final CANcoder pivotEncoder = new CANcoder(OuttakeConstants.encoderID, "can");
 
-  // CANdi (integrates limit switch input to CAN Bus)
+  // CANdi Objects (integrates limit switch input to CAN Bus)
   private final CANdi hardstop = new CANdi(OuttakeConstants.CANdiID, "can");
 
   public OuttakeSubsystem() {
