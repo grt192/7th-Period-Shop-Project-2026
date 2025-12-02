@@ -144,8 +144,12 @@ public class OuttakeSubsystem extends SubsystemBase {
     return hardstop.getConfigurator().apply(candiConfig);
   }
 
-  private boolean getHardStopValue() {
+  private boolean isAtHardStop() {
     return motor.getReverseLimit().getValue() == ReverseLimitValue.ClosedToGround;
+  }
+
+  private void setEncoder(Angle position) {
+    pivotEncoder.setPosition(position);
   }
 
   private Torque getTorque() {
@@ -195,7 +199,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   boolean zeroReported = false;
 
   private void setVelocity(AngularVelocity setVelocity) {
-    if (getHardStopValue() && setVelocity.in(RPM) < 0) {
+    if (isAtHardStop() && setVelocity.in(RPM) < 0) {
       setVelocity = RPM.of(0);
     } else if (getPosition().gt(OuttakeConstants.forwardSoftLimitAngle) && setVelocity.in(RPM) > 0) {
       setVelocity = RPM.of(0);
@@ -213,7 +217,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   }
 
   private void setVoltage(Voltage setVoltage) {
-    if (getHardStopValue() && setVoltage.in(Volts) < 0) {
+    if (isAtHardStop() && setVoltage.in(Volts) < 0) {
       setVoltage = Volts.of(0);
     } else if (getPosition().gt(OuttakeConstants.forwardSoftLimitAngle) && setVoltage.in(Volts) > 0) {
       setVoltage = Volts.of(0);
@@ -337,7 +341,7 @@ public class OuttakeSubsystem extends SubsystemBase {
    * 
    * AngularVelocity desiredVelocity =
    * OuttakeConstants.maxSafeVelocity.times(shapedInput);
-   * if (getHardStopValue() && desiredVelocity.in(RPM) > 0) {
+   * if (isAtHardStop() && desiredVelocity.in(RPM) > 0) {
    * desiredVelocity = RPM.of(0);
    * }
    * setVelocity(desiredVelocity);
@@ -354,7 +358,7 @@ public class OuttakeSubsystem extends SubsystemBase {
    * .times
    * (Volts.of(12));
    * Voltage outputVoltage = maxVoltage.times(shapedInput);
-   * if (getHardStopValue() && outputVoltage.in(Volts) > 0) {
+   * if (isAtHardStop() && outputVoltage.in(Volts) > 0) {
    * outputVoltage = Volts.of(0);
    * }
    * setVoltage(outputVoltage);
