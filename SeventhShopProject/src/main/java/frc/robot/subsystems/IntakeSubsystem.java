@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.CANdi;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -27,6 +28,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private double upperLim = /*decide val */ 3.5; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
   private double invert = 1; //to reverse direction, just change 1 to -1
   DoublePublisher pos;
+  TalonFXConfiguration PID = new TalonFXConfiguration();
   
   
 
@@ -36,6 +38,17 @@ public class IntakeSubsystem extends SubsystemBase {
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("data");
     pos = table.getDoubleTopic("pos").publish();
+    config();
+    
+  }
+
+  private void config(){
+    PID.Slot0.kP = 0;                                                //fix these guys somehow
+    PID.Slot0.kI = 1;
+    PID.Slot0.kV = 2;
+    PID.Slot0.kD = 3;
+    PID.Slot0.kG = 4;
+    leverMotor.getConfigurator().apply(PID);
   }
 
   public void manual(boolean left, boolean right){
