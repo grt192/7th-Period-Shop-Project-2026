@@ -2,9 +2,13 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.units.measure.*;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.units.CurrentUnit;
 import edu.wpi.first.units.TorqueUnit;
 
@@ -44,6 +48,11 @@ public class OuttakeSubsystem extends SubsystemBase {
   // CANdi Objects (integrates limit switch input to CAN Bus)
   private final CANdi hardstop = new CANdi(OuttakeConstants.CANdiID, "can");
 
+  // Mechanism2d visualization
+  private final Mechanism2d mechanism;
+  private final MechanismRoot2d pivotRoot;
+  private final MechanismLigament2d pivotArm;
+
   public OuttakeSubsystem() {
     StatusCode motorConfigStatus = configureMotors();
     StatusCode encoderStatusCode = configureEncoder();
@@ -56,6 +65,19 @@ public class OuttakeSubsystem extends SubsystemBase {
     }
 
     DataLogManager.start();
+
+    // Create Mechanism2d visualization (3m x 3m canvas)
+    mechanism = new Mechanism2d(3, 3);
+    // Root at bottom center (1.5m from left, 0.5m from bottom)
+    pivotRoot = mechanism.getRoot("pivot", 1.5, 1.5);
+    // Arm ligament - scale up by 4x for better visibility (visual only, doesn't
+    // affect physics)
+    double visualLength = OuttakeConstants.armLength.in(Meters) * 4.0;
+    pivotArm = pivotRoot.append(
+        new MechanismLigament2d("arm", visualLength, 0, 6, new Color8Bit(Color.kOrange)));
+    // Publish to SmartDashboard
+    SmartDashboard.putData("Simulation/Pivot", mechanism);
+
     updateLogging();
 
     // update motor Kt value
@@ -158,6 +180,8 @@ public class OuttakeSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("PID/Error", motor.getClosedLoopError().getValueAsDouble());
     SmartDashboard.putString("PID/Unit", motor.getClosedLoopReference().getUnits());
     SmartDashboard.putBoolean("PID/atPosition", atSetPosition());
+
+    pivotArm.setAngle(getPosition().in(Degrees));
   }
 
   // check if hard stop limit switch is pressed
