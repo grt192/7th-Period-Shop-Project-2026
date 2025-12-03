@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj.Timer;
 //current limits
 //mutual vs braking mode
 //torquecurrentfoc instead of voltage
-//lower pos
-//upperPos
 //axis 0
 
 
@@ -31,7 +29,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private CANdi limit = new CANdi(/*insert number */ 2);
   private boolean autoOn = false;
   private final double upperLim = 3.5; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
-  private double magnVel = 1; //to reverse direction, just change 1 to -1
+  private double magnVel = 0.5; //to reverse direction, just change 1 to -1
   DoublePublisher pos;
   TalonFXConfiguration PID = new TalonFXConfiguration();
   NetworkTableInstance inst;
@@ -75,7 +73,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }else if((!left && right) && (leverMotor.getPosition().getValueAsDouble() < upperLim)){ //right pressed, go up (unless too high already)
       leverMotor.set(1*magnVel);
       down = false;
-    }else{                                          //none pressed, freeze
+    }else{                                          //none pressed, freeze. alternatively, if going up but above upperLim, also stop
       leverMotor.set(0.0*magnVel);
       leverMotor.setControl(new PositionVoltage(leverMotor.getPosition().getValueAsDouble()));
       down = false;
