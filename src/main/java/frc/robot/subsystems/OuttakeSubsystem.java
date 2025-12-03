@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.GRTUtils;
 import frc.robot.Constants.OuttakeConstants;
 
 public class OuttakeSubsystem extends SubsystemBase {
@@ -180,13 +181,14 @@ public class OuttakeSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Motor/Applied Voltage", getMotorVoltage().in(Volts));
     SmartDashboard.putNumber("Motor/Supply Current", getSupplyCurrent().in(Amps));
     SmartDashboard.putNumber("Motor/Torque Current", getTorqueCurrent().in(Amps));
-    SmartDashboard.putNumber("Motor/Applied Torque", getTorque().in(NewtonMeters));
-    SmartDashboard.putNumber("Motor/Velocity", getVelocity().in(RPM));
-    SmartDashboard.putNumber("Motor/Absolute Position", getPosition().in(Degrees));
+    SmartDashboard.putNumber("Motor/Applied Torque", GRTUtils.round(getTorque().in(NewtonMeters), 2));
+
+    SmartDashboard.putNumber("Motor/Velocity", GRTUtils.round(getVelocity().in(RPM), 2));
+    SmartDashboard.putNumber("Motor/Absolute Position", GRTUtils.round(getPosition().in(Degrees), 2));
 
     SmartDashboard.putString("PID/Control Mode", motor.getControlMode().toString());
-    SmartDashboard.putNumber("PID/Setpoint", motor.getClosedLoopReference().getValueAsDouble()); // RPS in velocity mode
-    SmartDashboard.putNumber("PID/Error", motor.getClosedLoopError().getValueAsDouble());
+    SmartDashboard.putNumber("PID/Setpoint", GRTUtils.round(motor.getClosedLoopReference().getValueAsDouble(), 2)); // RPS
+    SmartDashboard.putNumber("PID/Error", GRTUtils.round(motor.getClosedLoopError().getValueAsDouble(), 2));
     SmartDashboard.putString("PID/Unit", motor.getClosedLoopReference().getUnits());
     SmartDashboard.putBoolean("PID/atPosition", atSetPosition());
 
