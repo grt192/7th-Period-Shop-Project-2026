@@ -19,6 +19,7 @@ public class RobotContainer {
   private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
 
   // subsystem used to test the controller bindings
+  @SuppressWarnings("unused")
   private final ControllerTest m_controllerTest = new ControllerTest();
 
   // Driver controller

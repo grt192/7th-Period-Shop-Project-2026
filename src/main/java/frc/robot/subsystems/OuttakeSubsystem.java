@@ -28,6 +28,7 @@ import com.ctre.phoenix6.signals.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OuttakeConstants;
 
 public class OuttakeSubsystem extends SubsystemBase {
@@ -79,6 +80,11 @@ public class OuttakeSubsystem extends SubsystemBase {
     SmartDashboard.putData("Simulation/Pivot", mechanism);
 
     updateLogging();
+
+    // create a trigger based on hardstop limit switch and reset encoder when limit
+    // switch triggered
+    Trigger hardStopTrigger = new Trigger(this::isAtHardStop);
+    hardStopTrigger.onTrue(this.runOnce(() -> setEncoder(OuttakeConstants.reverseSoftLimitAngle)));
 
     // update motor Kt value
     motorKt = motor.getMotorKT().getValue();
@@ -287,6 +293,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   }
 
   // Directly set the motor voltage (preferred over DutyCycle for repeatability)
+  @SuppressWarnings("unused")
   private void setVoltage(Voltage setVoltage) {
     // If at hard or soft stop, do not move if desired motion is into the stop
     if (isAtHardStop() && setVoltage.in(Volts) < 0) {
