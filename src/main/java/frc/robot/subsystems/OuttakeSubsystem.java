@@ -3,12 +3,15 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.CurrentUnit;
 import edu.wpi.first.units.TorqueUnit;
 
@@ -88,13 +91,15 @@ public class OuttakeSubsystem extends SubsystemBase {
 
     // update motor Kt value
     motorKt = motor.getMotorKT().getValue();
+
+    setPosition(Degrees.of(0));
   }
 
   private StatusCode configureMotors() {
     // Set PID values for position control
     final Slot0Configs positionPIDConfigs = new Slot0Configs()
-        .withKG(OuttakeConstants.pos_kG)
-        .withKS(OuttakeConstants.pos_kS)
+        .withKG(OuttakeConstants.kG)
+        .withKS(OuttakeConstants.kS)
         .withKP(OuttakeConstants.pos_kP)
         .withKI(OuttakeConstants.pos_kI)
         .withKD(OuttakeConstants.pos_kD)
@@ -103,8 +108,8 @@ public class OuttakeSubsystem extends SubsystemBase {
 
     // Set PID values for velocity control
     final Slot1Configs velocityPIDConfigs = new Slot1Configs()
-        .withKG(OuttakeConstants.vel_kG)
-        .withKS(OuttakeConstants.vel_kS)
+        .withKG(OuttakeConstants.kG)
+        .withKS(OuttakeConstants.kS)
         .withKP(OuttakeConstants.vel_kP)
         .withKI(OuttakeConstants.vel_kI)
         .withKD(OuttakeConstants.vel_kD)
@@ -459,47 +464,45 @@ public class OuttakeSubsystem extends SubsystemBase {
    * }
    */
 
-  // private final DCMotor m_motorSim = DCMotor.getKrakenX60Foc(1);
-  // private final SingleJointedArmSim m_armSim = new
-  // SingleJointedArmSim(m_motorSim,
-  // OuttakeConstants.mechGearRatio,
-  // OuttakeConstants.armMomentOfInertia.in(KilogramSquareMeters),
-  // OuttakeConstants.armLength.in(Meters),
-  // OuttakeConstants.reverseSoftLimitAngle.in(Radians),
-  // OuttakeConstants.forwardSoftLimitAngle.in(Radians),
-  // true,
-  // 0);
+  private final DCMotor m_motorSim = DCMotor.getKrakenX60Foc(1);
+  private final SingleJointedArmSim m_armSim = new SingleJointedArmSim(m_motorSim,
+      OuttakeConstants.mechGearRatio,
+      OuttakeConstants.armMomentOfInertia.in(KilogramSquareMeters),
+      OuttakeConstants.armLength.in(Meters),
+      OuttakeConstants.reverseSoftLimitAngle.in(Radians),
+      OuttakeConstants.forwardSoftLimitAngle.in(Radians),
+      true,
+      0);
 
   @Override
   public void simulationPeriodic() {
-    updateLogging();
     var talonFXSim = motor.getSimState();
     var hardstopSim = hardstop.getSimState();
-    // var cancoderSim = pivotEncoder.getSimState();
+    var cancoderSim = pivotEncoder.getSimState();
 
-    // talonFXSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-    // var motorVoltage = talonFXSim.getMotorVoltageMeasure();
+    talonFXSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+    var motorVoltage = talonFXSim.getMotorVoltageMeasure();
 
-    // m_armSim.setInputVoltage(motorVoltage.in(Volts));
-    // m_armSim.update(0.020);
+    m_armSim.setInputVoltage(motorVoltage.in(Volts));
+    m_armSim.update(0.020);
 
-    // Angle armAngle = Radians.of(m_armSim.getAngleRads());
-    // Angle motorAngle = armAngle.times(OuttakeConstants.mechGearRatio);
+    Angle armAngle = Radians.of(m_armSim.getAngleRads());
+    Angle motorAngle = armAngle.times(OuttakeConstants.mechGearRatio);
 
-    // AngularVelocity armVelocity =
-    // RadiansPerSecond.of(m_armSim.getVelocityRadPerSec());
-    // AngularVelocity motorVelocity =
-    // armVelocity.times(OuttakeConstants.mechGearRatio);
+    AngularVelocity armVelocity = RadiansPerSecond.of(m_armSim.getVelocityRadPerSec());
+    AngularVelocity motorVelocity = armVelocity.times(OuttakeConstants.mechGearRatio);
 
-    // cancoderSim.setRawPosition(armAngle);
-    // cancoderSim.setVelocity(armVelocity);
+    cancoderSim.setRawPosition(armAngle);
+    cancoderSim.setVelocity(armVelocity);
 
-    // talonFXSim.setRawRotorPosition(motorAngle);
-    // talonFXSim.setRotorVelocity(motorVelocity);
+    talonFXSim.setRawRotorPosition(motorAngle);
+    talonFXSim.setRotorVelocity(motorVelocity);
 
     boolean simHardstopTriggered = getPosition().lte(OuttakeConstants.reverseSoftLimitAngle);
     S1StateValue hardstopValue = simHardstopTriggered ? S1StateValue.Low : S1StateValue.High;
     hardstopSim.setS1State(hardstopValue);
     talonFXSim.setReverseLimit(simHardstopTriggered);
+
+    updateLogging();
   }
 }

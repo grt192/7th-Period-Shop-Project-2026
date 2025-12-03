@@ -74,17 +74,16 @@ public final class Constants {
     public static final ReverseLimitSourceValue limitSwitchPort = ReverseLimitSourceValue.RemoteCANdiS1;
 
     // PID Constants
-    public static final float pos_kG = 0.35f;
-    public static final float pos_kS = 0.25f;
-    public static final float pos_kP = 45f;
-    public static final float pos_kI = 0.1f;
-    public static final float pos_kD = 3.5f;
+    public static final float kG = 5.354004f;
+    public static final float kS = 0f;
 
-    public static final float vel_kG = 0;
-    public static final float vel_kS = 0f;
-    public static final float vel_kP = 0.3f;
-    public static final float vel_kI = 0.0f;
-    public static final float vel_kD = 0.1f;
+    public static final float pos_kP = 0f;
+    public static final float pos_kI = 0f;
+    public static final float pos_kD = 0f;
+
+    public static final float vel_kP = 0f;
+    public static final float vel_kI = 0f;
+    public static final float vel_kD = 0f;
 
     // Positions
     public static final Angle homeAngle = Degrees.of(90);
