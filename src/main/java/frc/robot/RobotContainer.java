@@ -30,10 +30,10 @@ public class RobotContainer {
     configureBindings();
 
     // Outtake uses velocity control with triggers
-    // m_outtakeSubsystem.setDefaultCommand(
-    // m_outtakeSubsystem.VelocityControl(
-    // () -> -m_driverController.getL2Axis(),
-    // () -> -m_driverController.getR2Axis()));
+    m_outtakeSubsystem.setDefaultCommand(
+        m_outtakeSubsystem.VelocityControl(
+            () -> -m_driverController.getL2Axis(),
+            () -> -m_driverController.getR2Axis()));
 
     // Drive base utilizes tank drive controls
     m_driveSubsystem.setDefaultCommand(

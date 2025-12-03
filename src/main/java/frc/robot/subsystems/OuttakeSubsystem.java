@@ -91,8 +91,6 @@ public class OuttakeSubsystem extends SubsystemBase {
 
     // update motor Kt value
     motorKt = motor.getMotorKT().getValue();
-
-    setPosition(Degrees.of(0));
   }
 
   private StatusCode configureMotors() {
@@ -384,9 +382,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   // Returns command to go the next lowest position from the current position
   private Command selectStepDownCommand() {
     Angle currentPos = getPosition();
-    if (currentPos.gt(OuttakeConstants.homeAngle) && !atPosition(OuttakeConstants.homeAngle)) {
-      return goToHome(true);
-    } else if (currentPos.gt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
+    if (currentPos.gt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
       return goToTopBox(true);
     } else if (currentPos.gt(OuttakeConstants.bottomBoxAngle) && !atPosition(OuttakeConstants.bottomBoxAngle)) {
       return goToBottomBox(true);

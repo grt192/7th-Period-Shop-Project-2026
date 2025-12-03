@@ -77,12 +77,16 @@ public final class Constants {
     public static final float kG = 5.354004f;
     public static final float kS = 0f;
 
-    public static final float pos_kP = 0f;
+    // Designed from arm inertia (0.0229 kg m^2), 8:1 gearing, and Kraken torque
+    // constant (9.37 N m / 483 A). Targets ~0.5 s settling with ~1% overshoot.
+    public static final float pos_kP = 90f; // A / rotation
     public static final float pos_kI = 0f;
-    public static final float pos_kD = 0f;
+    public static final float pos_kD = 15f; // A / (rotation / s)
 
-    public static final float vel_kP = 0f;
-    public static final float vel_kI = 0f;
+    // Inner velocity loop treated as torque-current driven integrator. Tuned for
+    // ~0.1 s response to 60 rpm step with minimal overshoot in SingleJointedArmSim.
+    public static final float vel_kP = 25f; // A / (rotation / s)
+    public static final float vel_kI = 40f; // A / rotation
     public static final float vel_kD = 0f;
 
     // Positions
@@ -96,12 +100,13 @@ public final class Constants {
     public static final Angle encoderMagnetOffset = Degrees.of(0);
     public static final float mechGearRatio = 8.0f;
     public static final AngularVelocity approximateMaxVelocity = RPM.of(5000 / mechGearRatio);
-    public static final MomentOfInertia armMomentOfInertia = KilogramSquareMeters.of(0.0228579824);
+    public static final MomentOfInertia armMomentOfInertia = KilogramSquareMeters.of(0.0228579824); // Calculated from
+                                                                                                    // Onshape
     public static final Distance armLength = Inches.of(16.5);
 
     // Settings
     public static final Current currentLimit = Amps.of(120);
-    public static final AngularVelocity maxSafeVelocity = RPM.of(120);
+    public static final AngularVelocity maxSafeVelocity = RPM.of(30);
     public static final Angle acceptablePositionError = Degrees.of(3);
     public static final AngularVelocity acceptableVelocityError = RotationsPerSecond.of(1);
   }
