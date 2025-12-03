@@ -364,9 +364,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   // Returns command to go the next highest position from the current position
   private Command selectStepUpCommand() {
     Angle currentPos = getPosition();
-    if (currentPos.lt(OuttakeConstants.bottomBoxAngle) && !atPosition(OuttakeConstants.bottomBoxAngle)) {
-      return goToBottomBox(true);
-    } else if (currentPos.lt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
+    if (currentPos.lt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
       return goToTopBox(true);
     } else if (currentPos.lt(OuttakeConstants.homeAngle) && !atPosition(OuttakeConstants.homeAngle)) {
       return goToHome(true);
