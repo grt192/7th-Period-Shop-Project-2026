@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.units.CurrentUnit;
@@ -55,6 +56,7 @@ public class OuttakeSubsystem extends SubsystemBase {
     }
 
     DataLogManager.start();
+    updateLogging();
 
     // update motor Kt value
     motorKt = motor.getMotorKT().getValue();
@@ -142,6 +144,22 @@ public class OuttakeSubsystem extends SubsystemBase {
     return hardstop.getConfigurator().apply(CANdiConfig);
   }
 
+  private void updateLogging() {
+    SmartDashboard.putNumber("Motor/Supply Voltage", getSupplyVoltage().in(Volts));
+    SmartDashboard.putNumber("Motor/Applied Voltage", getMotorVoltage().in(Volts));
+    SmartDashboard.putNumber("Motor/Supply Current", getSupplyCurrent().in(Amps));
+    SmartDashboard.putNumber("Motor/Torque Current", getTorqueCurrent().in(Amps));
+    SmartDashboard.putNumber("Motor/Applied Torque", getTorque().in(NewtonMeters));
+    SmartDashboard.putNumber("Motor/Velocity", getVelocity().in(RPM));
+    SmartDashboard.putNumber("Motor/Absolute Position", getPosition().in(Degrees));
+
+    SmartDashboard.putString("PID/Control Mode", motor.getControlMode().toString());
+    SmartDashboard.putNumber("PID/Setpoint", motor.getClosedLoopReference().getValueAsDouble()); // RPS in velocity mode
+    SmartDashboard.putNumber("PID/Error", motor.getClosedLoopError().getValueAsDouble());
+    SmartDashboard.putString("PID/Unit", motor.getClosedLoopReference().getUnits());
+    SmartDashboard.putBoolean("PID/atPosition", atSetPosition());
+  }
+
   // check if hard stop limit switch is pressed
   private boolean isAtHardStop() {
     return hardstop.getS1Closed().getValue();
@@ -167,6 +185,26 @@ public class OuttakeSubsystem extends SubsystemBase {
   // Gets current arm position from the CANcoder
   private Angle getPosition() {
     return motor.getPosition().getValue();
+  }
+
+  // Gets current voltage supplied to motor
+  private Voltage getSupplyVoltage() {
+    return motor.getSupplyVoltage().getValue();
+  }
+
+  // Gets the applied motor voltage
+  private Voltage getMotorVoltage() {
+    return motor.getMotorVoltage().getValue();
+  }
+
+  // Gets the current supplied to the motor
+  private Current getSupplyCurrent() {
+    return motor.getSupplyCurrent().getValue();
+  }
+
+  // Gets the applied motor current
+  private Current getTorqueCurrent() {
+    return motor.getTorqueCurrent().getValue();
   }
 
   // Checks if arm is at position set by PID control with a tolerance
@@ -403,6 +441,7 @@ public class OuttakeSubsystem extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
+    updateLogging();
     var talonFXSim = motor.getSimState();
     var hardstopSim = hardstop.getSimState();
     // var cancoderSim = pivotEncoder.getSimState();
