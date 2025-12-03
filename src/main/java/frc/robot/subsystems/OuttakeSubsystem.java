@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.units.CurrentUnit;
 import edu.wpi.first.units.TorqueUnit;
 
@@ -52,6 +54,9 @@ public class OuttakeSubsystem extends SubsystemBase {
       throw new IllegalStateException("Haha ur fucked");
     }
 
+    DataLogManager.start();
+
+    // update motor Kt value
     motorKt = motor.getMotorKT().getValue();
   }
 
@@ -188,7 +193,6 @@ public class OuttakeSubsystem extends SubsystemBase {
 
   // Uses PID to command arm to set position
   private void setPosition(Angle posAngle) {
-    zeroReported = false;
     // If the desired position is out of the range of the arm, clamp the set
     // position to relevant extreme
     if (posAngle.gt(OuttakeConstants.forwardSoftLimitAngle)) {
@@ -197,8 +201,7 @@ public class OuttakeSubsystem extends SubsystemBase {
       posAngle = OuttakeConstants.reverseSoftLimitAngle;
     }
 
-    System.out.print("Position: ");
-    System.out.println(posAngle.toLongString());
+    DataLogManager.log("Going to position: " + posAngle.toLongString());
     // Set motor control
     motor.setControl(posRequest.withPosition(posAngle));
   }
@@ -208,8 +211,6 @@ public class OuttakeSubsystem extends SubsystemBase {
     return motor.getVelocity().getValue();
   }
 
-  boolean zeroReported = false;
-
   // Set the motor velocity with PID
   private void setVelocity(AngularVelocity setVelocity) {
     // If at hard or soft stop, set velocity to zero if going in direction of stop
@@ -217,16 +218,6 @@ public class OuttakeSubsystem extends SubsystemBase {
       setVelocity = RPM.of(0);
     } else if (isAtForwardSoftStop() && setVelocity.in(RPM) > 0) {
       setVelocity = RPM.of(0);
-    }
-    // Print statement logging (will remove)
-    if (!setVelocity.isEquivalent(RPM.of(0))) {
-      zeroReported = false;
-      System.out.print("Velocity: ");
-      System.out.println(setVelocity.toLongString());
-    } else if (!zeroReported) {
-      zeroReported = true;
-      System.out.print("Velocity: ");
-      System.out.println(setVelocity.toLongString());
     }
 
     // Control motor with velocity PID
@@ -299,19 +290,13 @@ public class OuttakeSubsystem extends SubsystemBase {
   // Returns command to go the next highest position from the current position
   private Command selectStepUpCommand() {
     Angle currentPos = getPosition();
-    System.out.print(currentPos.toLongString());
-    System.out.print(" ");
     if (currentPos.lt(OuttakeConstants.bottomBoxAngle) && !atPosition(OuttakeConstants.bottomBoxAngle)) {
-      System.out.println(1);
       return goToBottomBox(true);
     } else if (currentPos.lt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
-      System.out.println(2);
       return goToTopBox(true);
     } else if (currentPos.lt(OuttakeConstants.homeAngle) && !atPosition(OuttakeConstants.homeAngle)) {
-      System.out.println(3);
       return goToHome(true);
     } else {
-      System.out.println(4);
       return goToBottomBox(true);
     }
   }
@@ -325,19 +310,13 @@ public class OuttakeSubsystem extends SubsystemBase {
   // Returns command to go the next lowest position from the current position
   private Command selectStepDownCommand() {
     Angle currentPos = getPosition();
-    System.out.print(currentPos.toLongString());
-    System.out.print(" ");
     if (currentPos.gt(OuttakeConstants.homeAngle) && !atPosition(OuttakeConstants.homeAngle)) {
-      System.out.println(5);
       return goToHome(true);
     } else if (currentPos.gt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
-      System.out.println(6);
       return goToTopBox(true);
     } else if (currentPos.gt(OuttakeConstants.bottomBoxAngle) && !atPosition(OuttakeConstants.bottomBoxAngle)) {
-      System.out.println(7);
       return goToBottomBox(true);
     } else {
-      System.out.println(8);
       return goToHome(true);
     }
   }

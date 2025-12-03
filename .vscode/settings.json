@@ -60,6 +60,7 @@
     "edu.wpi.first.math.**.struct.*",
   ],
   "cSpell.words": [
+    "CTRE",
     "Feedforward",
     "Hardstop",
     "wpilib"
