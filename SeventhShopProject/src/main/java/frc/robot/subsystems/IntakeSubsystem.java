@@ -36,6 +36,7 @@ public class IntakeSubsystem extends SubsystemBase {
   NetworkTable table;
   private final double downPos = -1; //lower limit, in case angle of lever is lower. will be stopped by the limit anyway
   private boolean down = false; //current direction of arm
+  CurrentLimitsConfigs currLim;
   
   
 
@@ -55,6 +56,10 @@ public class IntakeSubsystem extends SubsystemBase {
     PID.Slot0.kV = 0.0;
     PID.Slot0.kD = 0.01;
     PID.Slot0.kG = 0.02;
+    currLim = new CurrentLimitsConfigs()
+      .withStatorCurrentLimit(50.0)              
+      .withStatorCurrentLimitEnable(true);
+    PID.withCurrentLimits(currLim);
     leverMotor.getConfigurator().apply(PID);
   }
 
