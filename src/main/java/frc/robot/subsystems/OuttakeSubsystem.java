@@ -15,7 +15,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.CurrentUnit;
 import edu.wpi.first.units.TorqueUnit;
 
-import java.util.Set;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.StatusCode;
@@ -376,7 +375,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   // Steps up the command arm (by default, wpilib would precompile the stepup
   // command based on initial position but defer fixes it)
   public Command stepUp() {
-    return Commands.defer(this::selectStepUpCommand, Set.of(this));
+    return this.defer(this::selectStepUpCommand);
   }
 
   // Returns command to go the next lowest position from the current position
@@ -394,7 +393,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   // Steps down the command arm (by default, wpilib would precompile the stepdown
   // command based on initial position but defer fixes it)
   public Command stepDown() {
-    return Commands.defer(this::selectStepDownCommand, Set.of(this));
+    return this.defer(this::selectStepDownCommand);
   }
 
   // Controls motor velocity with two inputs, one which sets negative velocity and
