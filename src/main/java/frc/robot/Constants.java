@@ -79,14 +79,14 @@ public final class Constants {
 
     // Designed from arm inertia (0.0229 kg m^2), 8:1 gearing, and Kraken torque
     // constant (9.37 N m / 483 A). Targets ~0.5 s settling with ~1% overshoot.
-    public static final float pos_kP = 90f; // A / rotation
+    public static final float pos_kP = 90f;
     public static final float pos_kI = 0f;
-    public static final float pos_kD = 15f; // A / (rotation / s)
+    public static final float pos_kD = 15f;
 
     // Inner velocity loop treated as torque-current driven integrator. Tuned for
     // ~0.1 s response to 60 rpm step with minimal overshoot in SingleJointedArmSim.
-    public static final float vel_kP = 25f; // A / (rotation / s)
-    public static final float vel_kI = 40f; // A / rotation
+    public static final float vel_kP = 25f;
+    public static final float vel_kI = 40f;
     public static final float vel_kD = 0f;
 
     // Positions
