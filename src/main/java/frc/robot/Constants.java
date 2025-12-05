@@ -110,4 +110,20 @@ public final class Constants {
     public static final Angle acceptablePositionError = Degrees.of(3);
     public static final AngularVelocity acceptableVelocityError = RotationsPerSecond.of(1);
   }
+
+  public static final class MusicConstants {
+    // CAN IDs for Kraken instruments
+    public static final int leadMotorID = 0;
+    public static final int harmonyMotorID = 1;
+
+    public static final String canBusName = "can";
+
+    // Files are deployed to src/main/deploy
+    public static final String[] songFiles = new String[] {
+        "nyanCat.chrp",
+        "undertale.chrp",
+        "mii.chrp",
+        "fromTheStart.chrp"
+    };
+  }
 }

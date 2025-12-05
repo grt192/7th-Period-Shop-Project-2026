@@ -4,12 +4,15 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.ControllerTest;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.MusicBoxSubsystem;
 import frc.robot.subsystems.OuttakeSubsystem;
 
 public class RobotContainer {
@@ -17,6 +20,7 @@ public class RobotContainer {
   // Subsystems
   private final OuttakeSubsystem m_outtakeSubsystem = new OuttakeSubsystem();
   private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
+  private final MusicBoxSubsystem m_musicBoxSubsystem = new MusicBoxSubsystem();
 
   // subsystem used to test the controller bindings
   @SuppressWarnings("unused")
@@ -56,6 +60,15 @@ public class RobotContainer {
     // D-Pad used to control step up and step down
     m_driverController.povUp().onTrue(m_outtakeSubsystem.stepUp());
     m_driverController.povDown().onTrue(m_outtakeSubsystem.stepDown());
+
+    Trigger robotDisabled = new Trigger(RobotState::isDisabled);
+
+    robotDisabled.and(m_driverController.povUp())
+        .onTrue(m_musicBoxSubsystem.selectNextSong());
+    robotDisabled.and(m_driverController.povDown())
+        .onTrue(m_musicBoxSubsystem.selectPreviousSong());
+    robotDisabled.and(m_driverController.cross())
+        .onTrue(m_musicBoxSubsystem.togglePlayPause());
   }
 
   public Command getAutonomousCommand() {
