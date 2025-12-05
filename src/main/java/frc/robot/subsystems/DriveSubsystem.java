@@ -102,7 +102,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Sets the left motor velocity with PID control
-    private void setLeftVelocity(AngularVelocity desiredVelocity) {
+    public void setLeftVelocity(AngularVelocity desiredVelocity) {
         // Calculate feed forward with WPI Lib method
         Voltage arbFF = Volts.of(velocityFeedforward.calculate(desiredVelocity.in(RPM)));
 
@@ -112,7 +112,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Sets the right motor velocity with PID control
-    private void setRightVelocity(AngularVelocity desiredVelocity) {
+    public void setRightVelocity(AngularVelocity desiredVelocity) {
         // Calculate feed forward with WPI Lib method
         Voltage arbFF = Volts.of(velocityFeedforward.calculate(desiredVelocity.in(RPM)));
 

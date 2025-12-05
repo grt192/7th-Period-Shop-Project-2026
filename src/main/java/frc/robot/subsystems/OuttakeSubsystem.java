@@ -195,54 +195,54 @@ public class OuttakeSubsystem extends SubsystemBase {
   }
 
   // check if hard stop limit switch is pressed
-  private boolean isAtHardStop() {
+  public boolean isAtHardStop() {
     return hardstop.getS1Closed().getValue();
   }
 
   // check if hard stop limit switch is pressed
-  private boolean isAtForwardSoftStop() {
+  public boolean isAtForwardSoftStop() {
     return motor.getForwardLimit().getValue() == ForwardLimitValue.ClosedToGround;
   }
 
   // set the CANcoder position to arbitrary position
-  private void setEncoder(Angle position) {
+  public void setEncoder(Angle position) {
     pivotEncoder.setPosition(position);
   }
 
   // Gets the torque applied by motor shaft based on motor kT and current
-  private Torque getTorque() {
+  public Torque getTorque() {
     motorKt = motor.getMotorKT().getValue();
     Current torqueCurrent = motor.getTorqueCurrent().getValue();
     return (Torque) motorKt.timesDivisor(torqueCurrent);
   }
 
   // Gets current arm position from the CANcoder
-  private Angle getPosition() {
+  public Angle getPosition() {
     return motor.getPosition().getValue();
   }
 
   // Gets current voltage supplied to motor
-  private Voltage getSupplyVoltage() {
+  public Voltage getSupplyVoltage() {
     return motor.getSupplyVoltage().getValue();
   }
 
   // Gets the applied motor voltage
-  private Voltage getMotorVoltage() {
+  public Voltage getMotorVoltage() {
     return motor.getMotorVoltage().getValue();
   }
 
   // Gets the current supplied to the motor
-  private Current getSupplyCurrent() {
+  public Current getSupplyCurrent() {
     return motor.getSupplyCurrent().getValue();
   }
 
   // Gets the applied motor current
-  private Current getTorqueCurrent() {
+  public Current getTorqueCurrent() {
     return motor.getTorqueCurrent().getValue();
   }
 
   // Checks if arm is at position set by PID control with a tolerance
-  private boolean atSetPosition() {
+  public boolean atSetPosition() {
     // if not in position control return false
     if (motor.getControlMode().getValue() != ControlModeValue.PositionTorqueCurrentFOC) {
       return false;
@@ -254,7 +254,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   }
 
   // Checks if arm is at given position
-  private boolean atPosition(Angle target) {
+  public boolean atPosition(Angle target) {
     // finds error between position and target and its absolute value
     Angle error = target.minus(getPosition());
     Angle absError = Radians.of(Math.abs(error.in(Radians)));
@@ -264,7 +264,7 @@ public class OuttakeSubsystem extends SubsystemBase {
   }
 
   // Uses PID to command arm to set position
-  private void setPosition(Angle posAngle) {
+  public void setPosition(Angle posAngle) {
     // If the desired position is out of the range of the arm, clamp the set
     // position to relevant extreme
     if (posAngle.gt(OuttakeConstants.forwardSoftLimitAngle)) {
@@ -279,12 +279,12 @@ public class OuttakeSubsystem extends SubsystemBase {
   }
 
   // Get arm velocity from CANcoder
-  private AngularVelocity getVelocity() {
+  public AngularVelocity getVelocity() {
     return motor.getVelocity().getValue();
   }
 
   // Set the motor velocity with PID
-  private void setVelocity(AngularVelocity setVelocity) {
+  public void setVelocity(AngularVelocity setVelocity) {
     // If at hard or soft stop, set velocity to zero if going in direction of stop
     if (isAtHardStop() && setVelocity.in(RPM) < 0) {
       setVelocity = RPM.of(0);
@@ -298,7 +298,7 @@ public class OuttakeSubsystem extends SubsystemBase {
 
   // Directly set the motor voltage (preferred over DutyCycle for repeatability)
   @SuppressWarnings("unused")
-  private void setVoltage(Voltage setVoltage) {
+  public void setVoltage(Voltage setVoltage) {
     // If at hard or soft stop, do not move if desired motion is into the stop
     if (isAtHardStop() && setVoltage.in(Volts) < 0) {
       setVoltage = Volts.of(0);
