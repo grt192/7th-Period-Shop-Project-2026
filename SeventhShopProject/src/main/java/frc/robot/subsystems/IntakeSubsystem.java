@@ -45,7 +45,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   
   public IntakeSubsystem() {
-    leverMotor.setPosition(downPos);
+    leverMotor.setPosition(upperLim);
     inst = NetworkTableInstance.getDefault();
     table = inst.getTable("data");
     pos = table.getDoubleTopic("pos").publish();
