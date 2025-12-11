@@ -29,7 +29,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private CANdi limit = new CANdi(/*insert number */ 2);
   private boolean autoOn = false;
   private final double upperLim = 3.5; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
-  private double magnVel = 0.5; //to reverse direction, just change 1 to -1
+  private double magnVel = 2; //to reverse direction, just change 1 to -1
   DoublePublisher pos;
   TalonFXConfiguration PID = new TalonFXConfiguration();
   NetworkTableInstance inst;
