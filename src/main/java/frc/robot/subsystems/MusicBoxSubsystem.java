@@ -8,10 +8,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MusicConstants;
+import frc.robot.Constants.OuttakeConstants;
 
 public class MusicBoxSubsystem extends SubsystemBase {
-    private final TalonFX leadInstrument = new TalonFX(MusicConstants.leadMotorID, "can");
-    private final TalonFX harmonyInstrument = new TalonFX(MusicConstants.harmonyMotorID, "can");
+    private final TalonFX leadInstrument = new TalonFX(OuttakeConstants.motorID, "can");
     private final Orchestra orchestra = new Orchestra();
 
     private int selectedSongIndex = 0;
@@ -20,7 +20,6 @@ public class MusicBoxSubsystem extends SubsystemBase {
 
     public MusicBoxSubsystem() {
         orchestra.addInstrument(leadInstrument);
-        orchestra.addInstrument(harmonyInstrument);
 
         if (hasSongs()) {
             loadSelectedSong();

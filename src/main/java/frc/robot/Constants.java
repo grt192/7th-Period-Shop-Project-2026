@@ -112,10 +112,6 @@ public final class Constants {
   }
 
   public static final class MusicConstants {
-    // CAN IDs for Kraken instruments
-    public static final int leadMotorID = 0;
-    public static final int harmonyMotorID = 1;
-
     // Files are deployed to src/main/deploy
     public static final String[] songFiles = new String[] {
         "nyanCat.chrp",
