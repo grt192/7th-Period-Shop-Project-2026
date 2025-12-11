@@ -67,14 +67,14 @@ public final class Constants {
 
   public static final class OuttakeConstants {
     // CAN IDs
-    public static final int motorID = 0;
-    public static final int encoderID = 1;
-    public static final int CANdiID = 2;
+    public static final int motorID = 2;
+    public static final int encoderID = 0;
+    public static final int CANdiID = 3;
 
-    public static final ReverseLimitSourceValue limitSwitchPort = ReverseLimitSourceValue.RemoteCANdiS1;
+    public static final ReverseLimitSourceValue limitSwitchPort = ReverseLimitSourceValue.RemoteCANdiS2;
 
     // PID Constants
-    public static final float kG = 5.354004f;
+    public static final float kG = 0f;
     public static final float kS = 0f;
 
     // Designed from arm inertia (0.0229 kg m^2), 8:1 gearing, and Kraken torque
@@ -97,7 +97,7 @@ public final class Constants {
     public static final Angle forwardSoftLimitAngle = Degrees.of(120);
 
     // Hardware Constants
-    public static final Angle encoderMagnetOffset = Degrees.of(0);
+    public static final Angle encoderMagnetOffset = Degrees.of(-0.012);
     public static final float mechGearRatio = 8.0f;
     public static final AngularVelocity approximateMaxVelocity = RPM.of(5000 / mechGearRatio);
     public static final MomentOfInertia armMomentOfInertia = KilogramSquareMeters.of(0.0228579824); // Calculated from
