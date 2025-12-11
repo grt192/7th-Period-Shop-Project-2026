@@ -379,13 +379,10 @@ public class OuttakeSubsystem extends SubsystemBase {
     Angle currentPos = getPosition();
     DataLogManager.log(currentPos.in(Degrees) + " degrees");
     if (currentPos.lt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
-      DataLogManager.log("1");
       return goToTopBox(true);
     } else if (currentPos.lt(OuttakeConstants.homeAngle) && !atPosition(OuttakeConstants.homeAngle)) {
-      DataLogManager.log("2");
       return goToHome(true);
     } else {
-      DataLogManager.log("3");
       return goToBottomBox(true);
     }
   }
@@ -401,13 +398,10 @@ public class OuttakeSubsystem extends SubsystemBase {
     Angle currentPos = getPosition();
     DataLogManager.log(currentPos.in(Degrees) + " degrees");
     if (currentPos.gt(OuttakeConstants.topBoxAngle) && !atPosition(OuttakeConstants.topBoxAngle)) {
-      DataLogManager.log("4");
       return goToTopBox(true);
     } else if (currentPos.gt(OuttakeConstants.bottomBoxAngle) && !atPosition(OuttakeConstants.bottomBoxAngle)) {
-      DataLogManager.log("5");
       return goToBottomBox(true);
     } else {
-      DataLogManager.log("6");
       return goToHome(true);
     }
   }
