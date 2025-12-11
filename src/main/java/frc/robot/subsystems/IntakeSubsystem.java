@@ -32,7 +32,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private CANdi limit = new CANdi(/*insert number */ 3);
   private boolean autoOn = false;
   private final double upperLim = 3.5; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
-  private double magnVel = 2; //to reverse direction, just change 1 to -1
+  private double magnVel = 0.1; //to reverse direction, just change 1 to -1
   DoublePublisher pos;
   TalonFXConfiguration PID = new TalonFXConfiguration();
   NetworkTableInstance inst;
@@ -63,16 +63,23 @@ public class IntakeSubsystem extends SubsystemBase {
     PID.Slot0.kD = 0.01;
     PID.Slot0.kG = 0.02;
 
+    PID.Slot1.kP = 0.2;    // velocity foc
+    PID.Slot1.kI = 0.0;
+    PID.Slot1.kD = 0.0;
+    PID.Slot1.kV = 1.0;   
+
 
     currLim = new CurrentLimitsConfigs()                             // current limits for safety
       .withStatorCurrentLimit(50.0)              
       .withStatorCurrentLimitEnable(true);
     PID.withCurrentLimits(currLim);
+
     PID.MotorOutput.NeutralMode = NeutralModeValue.Brake;          //neutral mode added, will brake automatically
     PID.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
     leverMotor.getConfigurator().apply(PID);
     focThing = new PositionTorqueCurrentFOC(0).withSlot(0); //sets FOC object with PID values
-    velFOCthing = new VelocityTorqueCurrentFOC(RotationsPerSecond.of(0)).withSlot(0);
+    velFOCthing = new VelocityTorqueCurrentFOC(RotationsPerSecond.of(0)).withSlot(1);
   
   }
 
