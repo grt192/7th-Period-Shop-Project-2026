@@ -35,14 +35,14 @@ public class IntakeSubsystem extends SubsystemBase {
   
   private TalonFX leverMotor = new TalonFX( /*insert numer */ 1, "can");
   private CANdi limit = new CANdi(/*insert number */ 3);
-  private boolean autoOn = true;
+  private boolean autoOn = false;
   private final double upperLim = 3.5; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
   private double magnVel = 0.05; //to reverse direction, just change 1 to -1
   DoublePublisher pos;
   TalonFXConfiguration PID = new TalonFXConfiguration();
   NetworkTableInstance inst;
   NetworkTable table;
-  private final double downPos = -1.0; //lower limit, in case angle of lever is lower. will be stopped by the limit anyway
+  private final double downPos = 1.0; //lower limit, in case angle of lever is lower. will be stopped by the limit anyway
   private boolean up = false; //current direction of arm
   CurrentLimitsConfigs currLim;
   private PositionTorqueCurrentFOC focThing;
@@ -69,27 +69,9 @@ public class IntakeSubsystem extends SubsystemBase {
   public void configPID(double p, double i, double d, double ff) {
 
         Slot0Configs slot0Configs = new Slot0Configs(); //used to store and update PID values
-        /*
-         * Think of P as how much we want it to correct, as an example imagine you are parking a car
-         */
-
         slot0Configs.kP = p;
-        /*
-         * Integral Control's job is to correct recurring errors over time by stacking past errors.
-         * It sums up previous errors, so it looks at how many errors you have had over time.
-         */
         slot0Configs.kI = i;
-
-        /*
-         * The Derivitive Controls job is to look at the Rate of Change (slope) of how fast the error is changing (def of derrivitive)
-         * If the error is chaning too fast, the kD will slow it down so we do not overshoot
-         */
         slot0Configs.kD = d;
-
-        /*
-        * Feedforward Control (kFF, or kV in Phoenix 6) predicts how much power we need based only on how fast we want to go,
-        *      instead of waiting for an error to happen first.
-        */
         slot0Configs.kG = ff;
         
         leverMotor.getConfigurator().apply(slot0Configs);
@@ -120,7 +102,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private void config(){
     PID.Slot0.kP = 3;                                                //fix these guys somehow
-    PID.Slot0.kI = 0.1;                                                // config motors
+    PID.Slot0.kI = 3;                                                // config motors
     // PID.Slot0.kV = 1;
     PID.Slot0.kD = 0.01;
     // PID.Slot0.kG = 0.02;
@@ -141,7 +123,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     PID.MotionMagic.MotionMagicCruiseVelocity = 0.05;  // max speed (rotations/sec)
     PID.MotionMagic.MotionMagicAcceleration   = 1;  // how fast you ramp to that speed
-    PID.MotionMagic.MotionMagicJerk           = 0.0;
+    PID.MotionMagic.MotionMagicJerk           = 0.5;
     
     leverMotor.getConfigurator().apply(PID);
     focThing = new PositionTorqueCurrentFOC(0).withSlot(0); //sets FOC object with PID values
@@ -150,21 +132,28 @@ public class IntakeSubsystem extends SubsystemBase {
   
   }
 
+  boolean manualOn = false;
   public void manual(boolean left, boolean right){      // manual mode
     
      if(left && !right){                            //left pressed, go down
       leverMotor.set(-1*magnVel);
       up = false;
       holdPos = leverMotor.getPosition().getValueAsDouble();
+      manualOn = true;
       
     }else if((!left && right)){ 
       leverMotor.set(magnVel);
       up = true;
       holdPos = leverMotor.getPosition().getValueAsDouble();
+      manualOn = true;
       
     }else{                                          //none pressed, freeze. alternatively, if going up but above upperLim, also stop
+      if (manualOn == true){
       leverMotor.set(0);
+      manualOn = false;
       leverMotor.setControl(focThing.withPosition(holdPos));
+
+    }
       up = false;
 
     }
@@ -172,16 +161,16 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void autoSetIntake(boolean left, boolean right){   //auto mode
 
-    holdPos = leverMotor.getPosition().getValueAsDouble();
-
     if(left && !right ){                                    //left pressed, go to downPos
-        leverMotor.setControl(slo.withPosition(downPos));
+        leverMotor.setControl(focThing.withPosition(downPos));
         up = false;
+        holdPos = downPos;
       
     }else if(!left && right){
       
-        leverMotor.setControl(slo.withPosition(upperLim));   //right pressed, go to up pos // see to turn this to normavel
+        leverMotor.setControl(focThing.withPosition(upperLim));   //right pressed, go to up pos
         up = true;
+        holdPos = upperLim;
       
     }
 
@@ -190,10 +179,9 @@ public class IntakeSubsystem extends SubsystemBase {
   public void moveArm(boolean left, boolean right){
 
     if(limit.getS1Closed().refresh().getValue() && up ){ //check is bool is true or false when pressed. will go up if lim pressed, but not down
-      leverMotor.setPosition(upperLim); 
-      leverMotor.setControl(focThing.withPosition(upperLim));
-      up = false;
-      holdPos = leverMotor.getPosition().getValueAsDouble();
+       leverMotor.setPosition(upperLim); 
+        leverMotor.setControl(focThing.withPosition(upperLim));
+       up = false;
     }
 
     if(Timer.getFPGATimestamp() < haltUntil){
