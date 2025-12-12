@@ -48,6 +48,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private PositionTorqueCurrentFOC focThing;
   private VelocityTorqueCurrentFOC velFOCthing;
   private double haltUntil = 0;
+  private final double torqLim = 15;
 
   
   
@@ -142,40 +143,16 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void manual(boolean left, boolean right){      // manual mode
-    // if(left && right){                              //if both pressed, freeze motor at position, go to auto
-    //   leverMotor.setControl(focThing.withPosition(leverMotor.getPosition().getValueAsDouble()));
-    //   autoOn = true;
-    //   up = false;
-    //   haltUntil = Timer.getFPGATimestamp() + 0.5;
-    //   return;
-    // }
-    /* 
-    if(left && right){
-      autoOn = true;
-      leverMotor.set(0);
-      return;
-    }
-    */
+    
      if(left && !right){                            //left pressed, go down
-      // if (up == true){
-      // leverMotor.setControl(velFOCthing.withVelocity(RotationsPerSecond.of(-1*magnVel)));
-      // // leverMotor.setControl(focThing.withPosition(upperLim));
       leverMotor.set(-1*magnVel);
-      // up = false;
+      up = false;
       
-    }else if((!left && right)){ //&& !(limit.getS1Closed().refresh().getValue())){ //right pressed, go up (unless too high already)
-      // leverMotor.setControl(velFOCthing.withVelocity(RotationsPerSecond.of(1*magnVel)));
-      // if (up == false){
-      // // leverMotor.setControl(focThing.withPosition(downPos));
-
+    }else if((!left && right)){ 
       leverMotor.set(magnVel);
-      // up = true;
+      up = true;
       
-    }
-      
-    else{                                          //none pressed, freeze. alternatively, if going up but above upperLim, also stop
-      // leverMotor.setControl(focThing.withPosition(leverMotor.getPosition().getValueAsDouble()));
-      // up= false;
+    }else{                                          //none pressed, freeze. alternatively, if going up but above upperLim, also stop
       leverMotor.set(0);
       leverMotor.setControl(focThing.withPosition(leverMotor.getPosition().getValueAsDouble()));
 
@@ -183,16 +160,6 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void autoSetIntake(boolean left, boolean right){   //auto mode
-
-    /* 
-    if(left && right){                                      //both pressed, freeze motor, go to auto mode
-      leverMotor.setControl(focThing.withPosition(leverMotor.getPosition().getValueAsDouble()));
-      autoOn = false;
-      up = false;
-      haltUntil = Timer.getFPGATimestamp() + 0.5;
-      return;
-    }
-      */
 
     if(left && !right ){                                    //left pressed, go to downPos
         leverMotor.setControl(focThing.withPosition(downPos));
@@ -209,11 +176,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void moveArm(boolean left, boolean right){
 
-    // if(limit.getS1Closed().refresh().getValue() && up ){ //check is bool is true or false when pressed. will go up if lim pressed, but not down
-    //   leverMotor.setPosition(upperLim); 
-    //   // leverMotor.setControl(focThing.withPosition(upperLim));
-    //   // up = false;
-    // }
+    if(limit.getS1Closed().refresh().getValue() && up ){ //check is bool is true or false when pressed. will go up if lim pressed, but not down
+      leverMotor.setPosition(upperLim); 
+      leverMotor.setControl(focThing.withPosition(upperLim));
+      up = false;
+    }
 
     if(Timer.getFPGATimestamp() < haltUntil){
       return;
@@ -242,8 +209,6 @@ public class IntakeSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("lever motor position",leverMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("lever motor target",leverMotor.getClosedLoopReference().getValueAsDouble());
     SmartDashboard.putBoolean("autoOn",autoOn);
-    // SmartDashboard.putBoolean("left",autoOn);
-    // SmartDashboard.putBoolean("autoOn",autoOn);
     SmartDashboard.putBoolean("limitOn", limit.getS1Closed().refresh().getValue());
 
     pos.set(leverMotor.getPosition().getValueAsDouble()); //publish position of lever to network table
