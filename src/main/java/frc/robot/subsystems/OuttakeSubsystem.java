@@ -12,9 +12,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.networktables.NetworkTableEvent;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.CurrentUnit;
 import edu.wpi.first.units.TorqueUnit;
 
+import java.util.EnumSet;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.StatusCode;
@@ -91,8 +94,41 @@ public class OuttakeSubsystem extends SubsystemBase {
 
     // update motor Kt value
     motorKt = motor.getMotorKT().getValue();
+    configNT();
   }
+  public void configPID(double p, double i, double d, double ff) {
 
+    Slot0Configs slot0Configs = new Slot0Configs(); //used to store and update PID values
+    slot0Configs.kP = p;
+    slot0Configs.kI = i;
+    slot0Configs.kD = d;
+    slot0Configs.kS = ff;
+    slot0Configs.withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign);
+    slot0Configs.withGravityType(GravityTypeValue.Arm_Cosine);
+
+    motor.getConfigurator().apply(slot0Configs);
+  }
+  private void configNT(){
+    NetworkTableInstance.getDefault().getTable("outtakeNTDebug")
+            .getEntry("PIDF")
+            .setDoubleArray(
+                new double[] {
+                  OuttakeConstants.pos_kP,
+                  OuttakeConstants.pos_kI,
+                  OuttakeConstants.pos_kD,
+                  OuttakeConstants.kS
+                }
+            );
+    NetworkTableInstance.getDefault().getTable("outtakeNTDebug").addListener(
+             "PIDF",
+            EnumSet.of(NetworkTableEvent.Kind.kValueAll),
+            (table, key, event) -> {
+                double[] pidf = event.valueData.value.getDoubleArray();
+                configPID(pidf[0], pidf[1], pidf[2], pidf[3]);
+            }
+        );
+
+  }
   private StatusCode configureMotors() {
     // Set PID values for position control
     final Slot0Configs positionPIDConfigs = new Slot0Configs()

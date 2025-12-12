@@ -69,27 +69,9 @@ public class IntakeSubsystem extends SubsystemBase {
   public void configPID(double p, double i, double d, double ff) {
 
         Slot0Configs slot0Configs = new Slot0Configs(); //used to store and update PID values
-        /*
-         * Think of P as how much we want it to correct, as an example imagine you are parking a car
-         */
-
         slot0Configs.kP = p;
-        /*
-         * Integral Control's job is to correct recurring errors over time by stacking past errors.
-         * It sums up previous errors, so it looks at how many errors you have had over time.
-         */
         slot0Configs.kI = i;
-
-        /*
-         * The Derivitive Controls job is to look at the Rate of Change (slope) of how fast the error is changing (def of derrivitive)
-         * If the error is chaning too fast, the kD will slow it down so we do not overshoot
-         */
         slot0Configs.kD = d;
-
-        /*
-        * Feedforward Control (kFF, or kV in Phoenix 6) predicts how much power we need based only on how fast we want to go,
-        *      instead of waiting for an error to happen first.
-        */
         slot0Configs.kG = ff;
         
         leverMotor.getConfigurator().apply(slot0Configs);
