@@ -62,8 +62,8 @@ public final class Constants {
     public static final AngularVelocity maxMotorVelocity = RPM.of(3000);
 
     public static final Current currentLimit = Amps.of(50);
-    public static final Time closedLoopRampRate = Seconds.of(5);
-    public static final Time openLoopRampRate = Seconds.of(5);
+    public static final Time closedLoopRampRate = Seconds.of(0.05);
+    public static final Time openLoopRampRate = Seconds.of(0.1);
   }
 
   public static final class OuttakeConstants {
@@ -94,11 +94,11 @@ public final class Constants {
     public static final Angle homeAngle = Degrees.of(90);
     public static final Angle topBoxAngle = Degrees.of(-20);
     public static final Angle bottomBoxAngle = Degrees.of(-60);
-    public static final Angle reverseSoftLimitAngle = Degrees.of(-80);
-    public static final Angle forwardSoftLimitAngle = Degrees.of(120);
+    public static final Angle reverseSoftLimitAngle = Rotations.of(-0.15);
+    public static final Angle forwardSoftLimitAngle = Rotations.of(0.16);
 
     // Hardware Constants
-    public static final Angle encoderMagnetOffset = Rotations.of(-0.012);
+    public static final Angle encoderMagnetOffset = Rotations.of(-0.15);
     public static final float mechGearRatio = 8.0f;
     public static final AngularVelocity approximateMaxVelocity = RPM.of(5000 / mechGearRatio);
     public static final MomentOfInertia armMomentOfInertia = KilogramSquareMeters.of(0.0228579824); // Calculated from
