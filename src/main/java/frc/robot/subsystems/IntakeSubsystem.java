@@ -13,10 +13,12 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
@@ -25,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import static edu.wpi.first.units.Units.*;
 
 import java.security.Timestamp;
+import java.util.EnumSet;
 import java.util.EnumSet;
 
 
@@ -36,24 +39,31 @@ public class IntakeSubsystem extends SubsystemBase {
   private TalonFX leverMotor = new TalonFX( /*insert numer */ 1, "can");
   private CANdi limit = new CANdi(/*insert number */ 3);
   private boolean autoOn = true;
+  private boolean autoOn = true;
   private final double upperLim = 3.5; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
+  private double magnVel = 0.05; //to reverse direction, just change 1 to -1
   private double magnVel = 0.05; //to reverse direction, just change 1 to -1
   DoublePublisher pos;
   TalonFXConfiguration PID = new TalonFXConfiguration();
   NetworkTableInstance inst;
   NetworkTable table;
   private final double downPos = -1.0; //lower limit, in case angle of lever is lower. will be stopped by the limit anyway
+  private final double downPos = -1.0; //lower limit, in case angle of lever is lower. will be stopped by the limit anyway
   private boolean up = false; //current direction of arm
   CurrentLimitsConfigs currLim;
   private PositionTorqueCurrentFOC focThing;
   private VelocityTorqueCurrentFOC velFOCthing;
   private double haltUntil = 0;
+  private final double torqLim = 15;
+  private MotionMagicTorqueCurrentFOC slo;
+  private double holdPos;
 
   
   
 
   
   public IntakeSubsystem() {
+    holdPos=leverMotor.getPosition().getValueAsDouble();
     leverMotor.setPosition(upperLim);
     inst = NetworkTableInstance.getDefault();
     table = inst.getTable("data");
@@ -134,50 +144,34 @@ public class IntakeSubsystem extends SubsystemBase {
 
     PID.MotorOutput.NeutralMode = NeutralModeValue.Brake;          //neutral mode added, will brake automatically
     PID.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    PID.MotionMagic.MotionMagicCruiseVelocity = 0.05;  // max speed (rotations/sec)
+    PID.MotionMagic.MotionMagicAcceleration   = 1;  // how fast you ramp to that speed
+    PID.MotionMagic.MotionMagicJerk           = 0.0;
     
     leverMotor.getConfigurator().apply(PID);
     focThing = new PositionTorqueCurrentFOC(0).withSlot(0); //sets FOC object with PID values
     velFOCthing = new VelocityTorqueCurrentFOC(RotationsPerSecond.of(0)).withSlot(1);
+    slo = new MotionMagicTorqueCurrentFOC(0).withSlot(0);
   
   }
 
   public void manual(boolean left, boolean right){      // manual mode
-    // if(left && right){                              //if both pressed, freeze motor at position, go to auto
-    //   leverMotor.setControl(focThing.withPosition(leverMotor.getPosition().getValueAsDouble()));
-    //   autoOn = true;
-    //   up = false;
-    //   haltUntil = Timer.getFPGATimestamp() + 0.5;
-    //   return;
-    // }
-    /* 
-    if(left && right){
-      autoOn = true;
-      leverMotor.set(0);
-      return;
-    }
-    */
+    
      if(left && !right){                            //left pressed, go down
-      // if (up == true){
-      // leverMotor.setControl(velFOCthing.withVelocity(RotationsPerSecond.of(-1*magnVel)));
-      // // leverMotor.setControl(focThing.withPosition(upperLim));
       leverMotor.set(-1*magnVel);
-      // up = false;
+      up = false;
+      holdPos = leverMotor.getPosition().getValueAsDouble();
       
-    }else if((!left && right)){ //&& !(limit.getS1Closed().refresh().getValue())){ //right pressed, go up (unless too high already)
-      // leverMotor.setControl(velFOCthing.withVelocity(RotationsPerSecond.of(1*magnVel)));
-      // if (up == false){
-      // // leverMotor.setControl(focThing.withPosition(downPos));
-
+    }else if((!left && right)){ 
       leverMotor.set(magnVel);
-      // up = true;
+      up = true;
+      holdPos = leverMotor.getPosition().getValueAsDouble();
       
-    }
-      
-    else{                                          //none pressed, freeze. alternatively, if going up but above upperLim, also stop
-      // leverMotor.setControl(focThing.withPosition(leverMotor.getPosition().getValueAsDouble()));
-      // up= false;
+    }else{                                          //none pressed, freeze. alternatively, if going up but above upperLim, also stop
       leverMotor.set(0);
-      leverMotor.setControl(focThing.withPosition(leverMotor.getPosition().getValueAsDouble()));
+      leverMotor.setControl(focThing.withPosition(holdPos));
+      up = false;
 
     }
   }
@@ -195,13 +189,15 @@ public class IntakeSubsystem extends SubsystemBase {
       */
 
     if(left && !right ){                                    //left pressed, go to downPos
-        leverMotor.setControl(focThing.withPosition(downPos));
+        leverMotor.setControl(slo.withPosition(downPos));
         up = false;
+        holdPos = downPos;
       
     }else if(!left && right){
       
         leverMotor.setControl(focThing.withPosition(upperLim));   //right pressed, go to up pos
         up = true;
+        holdPos = upperLim;
       
     }
 
@@ -224,6 +220,7 @@ public class IntakeSubsystem extends SubsystemBase {
       autoOn = !autoOn;
       up = false;
       haltUntil = Timer.getFPGATimestamp() + 0.5;
+      holdPos = leverMotor.getPosition().getValueAsDouble();
       return;
     }
 
@@ -242,8 +239,6 @@ public class IntakeSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("lever motor position",leverMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("lever motor target",leverMotor.getClosedLoopReference().getValueAsDouble());
     SmartDashboard.putBoolean("autoOn",autoOn);
-    // SmartDashboard.putBoolean("left",autoOn);
-    // SmartDashboard.putBoolean("autoOn",autoOn);
     SmartDashboard.putBoolean("limitOn", limit.getS1Closed().refresh().getValue());
 
     pos.set(leverMotor.getPosition().getValueAsDouble()); //publish position of lever to network table
