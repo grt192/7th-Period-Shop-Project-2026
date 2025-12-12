@@ -172,16 +172,16 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void autoSetIntake(boolean left, boolean right){   //auto mode
 
+    holdPos = leverMotor.getPosition().getValueAsDouble();
+
     if(left && !right ){                                    //left pressed, go to downPos
         leverMotor.setControl(slo.withPosition(downPos));
         up = false;
-        holdPos = downPos;
       
     }else if(!left && right){
       
         leverMotor.setControl(slo.withPosition(upperLim));   //right pressed, go to up pos // see to turn this to normavel
         up = true;
-        holdPos = upperLim;
       
     }
 
