@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -59,6 +61,9 @@ public class RobotContainer {
     m_outtakeSubsystem.setDefaultCommand(
         m_outtakeSubsystem.valueControl(
             () -> m_driverController.getL2Axis(), () -> m_driverController.getR2Axis()));
+
+    m_driverController.cross()
+        .onTrue(Commands.runOnce(() -> m_outtakeSubsystem.setEncoder(Degrees.of(0)), m_outtakeSubsystem));
 
     // Only use music box when robot is disabled
     // Trigger robotDisabled = new Trigger(RobotState::isDisabled);
