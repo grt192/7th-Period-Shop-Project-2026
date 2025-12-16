@@ -189,11 +189,11 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     if(left && right){                                      //both pressed, freeze motor, go to auto mode
-      leverMotor.setControl(focThing.withPosition(leverMotor.getPosition().getValueAsDouble()));
       autoOn = !autoOn;
       up = false;
       haltUntil = Timer.getFPGATimestamp() + 0.5;
       holdPos = leverMotor.getPosition().getValueAsDouble();
+      leverMotor.setControl(focThing.withPosition(holdPos));
       return;
     }
 
