@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.RobotController;
 
 public class GRTUtils {
     public static double map(double x, double inMin, double inMax, double outMin, double outMax) {
@@ -32,5 +33,10 @@ public class GRTUtils {
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
+
+    public static long getFPGATime(){
+        return (long) (RobotController.getFPGATime());
+    }
+
 
 }

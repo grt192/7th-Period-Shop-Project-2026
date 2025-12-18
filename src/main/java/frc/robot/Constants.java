@@ -42,6 +42,9 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
+  public static final class DebugConstants{
+    public static final boolean MASTER_DEBUG = true;
+  }
   public static final class DriveConstants {
     // CAN IDs
     public static final int leftLeaderID = 12;

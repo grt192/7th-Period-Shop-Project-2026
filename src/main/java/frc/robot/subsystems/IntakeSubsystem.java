@@ -7,6 +7,8 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.utils.LoggedTalon;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -33,7 +35,7 @@ import java.util.EnumSet;
 
 public class IntakeSubsystem extends SubsystemBase {
   
-  private TalonFX leverMotor = new TalonFX( /*insert numer */ 1, "can");
+  private LoggedTalon leverMotor;
   private CANdi limit = new CANdi(/*insert number */ 3);
   private boolean autoOn = false;
   private final double upperLim = 3.5; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
@@ -57,46 +59,19 @@ public class IntakeSubsystem extends SubsystemBase {
 
   
   public IntakeSubsystem() {
-    holdPos=leverMotor.getPosition().getValueAsDouble();
+    config();
+    holdPos=leverMotor.getPosition();
     leverMotor.setPosition(upperLim);
     inst = NetworkTableInstance.getDefault();
     table = inst.getTable("data");
     pos = table.getDoubleTopic("pos").publish();
-    config();
     configNT();
     
   }
-  public void configPID(double p, double i, double d, double ff) {
-
-        Slot0Configs slot0Configs = new Slot0Configs(); //used to store and update PID values
-        slot0Configs.kP = p;
-        slot0Configs.kI = i;
-        slot0Configs.kD = d;
-        slot0Configs.kG = ff;
-        
-        leverMotor.getConfigurator().apply(slot0Configs);
-    }
 
 
   private void configNT(){
-    NetworkTableInstance.getDefault().getTable("intakeDEBUG")
-            .getEntry("PIDF")
-            .setDoubleArray(
-                new double[] {
-                    5,
-                    1,
-                    1,
-                    0.5
-                }
-            );
-    NetworkTableInstance.getDefault().getTable("intakeDEBUG").addListener(
-             "PIDF",
-            EnumSet.of(NetworkTableEvent.Kind.kValueAll),
-            (table, key, event) -> {
-                double[] pidf = event.valueData.value.getDoubleArray();
-                configPID(pidf[0], pidf[1], pidf[2], pidf[3]);
-            }
-        );
+
   }
 
 
@@ -124,8 +99,9 @@ public class IntakeSubsystem extends SubsystemBase {
     PID.MotionMagic.MotionMagicCruiseVelocity = 0.05;  // max speed (rotations/sec)
     PID.MotionMagic.MotionMagicAcceleration   = 1;  // how fast you ramp to that speed
     PID.MotionMagic.MotionMagicJerk           = 0.5;
-    
-    leverMotor.getConfigurator().apply(PID);
+
+    leverMotor = new LoggedTalon( /*insert numer */ 1, "can", PID);
+
     focThing = new PositionTorqueCurrentFOC(0).withSlot(0); //sets FOC object with PID values
     velFOCthing = new VelocityTorqueCurrentFOC(RotationsPerSecond.of(0)).withSlot(1);
     slo = new MotionMagicTorqueCurrentFOC(0).withSlot(0);
@@ -136,22 +112,22 @@ public class IntakeSubsystem extends SubsystemBase {
   public void manual(boolean left, boolean right){      // manual mode
     
      if(left && !right){                            //left pressed, go down
-      leverMotor.set(-1*magnVel);
+      leverMotor.setSpeed(-1*magnVel);
       up = false;
-      holdPos = leverMotor.getPosition().getValueAsDouble();
+      holdPos = leverMotor.getPosition();
       manualOn = true;
       
     }else if((!left && right)){ 
-      leverMotor.set(magnVel);
+      leverMotor.setSpeed(magnVel);
       up = true;
-      holdPos = leverMotor.getPosition().getValueAsDouble();
+      holdPos = leverMotor.getPosition();
       manualOn = true;
       
     }else{                                          //none pressed, freeze. alternatively, if going up but above upperLim, also stop
       if (manualOn == true){
-      leverMotor.set(0);
+      leverMotor.setSpeed(0);
       manualOn = false;
-      leverMotor.setControl(focThing.withPosition(holdPos));
+      leverMotor.setPositionReference(holdPos);
 
     }
       up = false;
@@ -162,13 +138,13 @@ public class IntakeSubsystem extends SubsystemBase {
   public void autoSetIntake(boolean left, boolean right){   //auto mode
 
     if(left && !right ){                                    //left pressed, go to downPos
-        leverMotor.setControl(focThing.withPosition(downPos));
+        leverMotor.setPositionReference(downPos);
         up = false;
         holdPos = downPos;
       
     }else if(!left && right){
       
-        leverMotor.setControl(focThing.withPosition(upperLim));   //right pressed, go to up pos
+        leverMotor.setPositionReference(downPos);   //right pressed, go to up pos
         up = true;
         holdPos = upperLim;
       
@@ -180,7 +156,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     if(limit.getS1Closed().refresh().getValue() && up ){ //check is bool is true or false when pressed. will go up if lim pressed, but not down
        leverMotor.setPosition(upperLim); 
-        leverMotor.setControl(focThing.withPosition(upperLim));
+        leverMotor.setPositionReference(upperLim);
        up = false;
     }
 
@@ -192,8 +168,8 @@ public class IntakeSubsystem extends SubsystemBase {
       autoOn = !autoOn;
       up = false;
       haltUntil = Timer.getFPGATimestamp() + 0.5;
-      holdPos = leverMotor.getPosition().getValueAsDouble();
-      leverMotor.setControl(focThing.withPosition(holdPos));
+      holdPos = leverMotor.getPosition();
+      leverMotor.setPositionReference(holdPos);
       return;
     }
 
@@ -209,13 +185,8 @@ public class IntakeSubsystem extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("lever motor position",leverMotor.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("lever motor target",leverMotor.getClosedLoopReference().getValueAsDouble());
-    SmartDashboard.putBoolean("autoOn",autoOn);
-    SmartDashboard.putBoolean("limitOn", limit.getS1Closed().refresh().getValue());
 
-    pos.set(leverMotor.getPosition().getValueAsDouble()); //publish position of lever to network table
-
+    if 
   }
 
 
