@@ -34,7 +34,7 @@ import java.util.EnumSet;
 public class IntakeSubsystem extends SubsystemBase {
   
   private TalonFX leverMotor = new TalonFX( /*insert numer */ 1, "can");
-  private CANdi limit = new CANdi(/*insert number */ 3);
+  //private CANdi limit = new CANdi(/*insert number */ 3);
   private boolean autoOn = false;
   private final double upperLim = 3.5; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
   private double magnVel = 0.05; //to reverse direction, just change 1 to -1
@@ -124,6 +124,7 @@ public class IntakeSubsystem extends SubsystemBase {
     PID.MotionMagic.MotionMagicCruiseVelocity = 0.05;  // max speed (rotations/sec)
     PID.MotionMagic.MotionMagicAcceleration   = 1;  // how fast you ramp to that speed
     PID.MotionMagic.MotionMagicJerk           = 0.5;
+    PID.Feedback.SensorToMechanismRatio = 12;
     
     leverMotor.getConfigurator().apply(PID);
     focThing = new PositionTorqueCurrentFOC(0).withSlot(0); //sets FOC object with PID values
@@ -178,11 +179,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void moveArm(boolean left, boolean right){
 
-    if(limit.getS1Closed().refresh().getValue() && up ){ //check is bool is true or false when pressed. will go up if lim pressed, but not down
+   /*  if(limit.getS1Closed().refresh().getValue() && up ){ //check is bool is true or false when pressed. will go up if lim pressed, but not down
        leverMotor.setPosition(upperLim); 
         leverMotor.setControl(focThing.withPosition(upperLim));
        up = false;
     }
+       */
 
     if(Timer.getFPGATimestamp() < haltUntil){
       return;
@@ -207,15 +209,26 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
   }
+
+  double number = 3.5;
+  double lastnumber = 3.5;
+
   @Override
   public void periodic() {
     SmartDashboard.putNumber("lever motor position",leverMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("lever motor target",leverMotor.getClosedLoopReference().getValueAsDouble());
     SmartDashboard.putBoolean("autoOn",autoOn);
-    SmartDashboard.putBoolean("limitOn", limit.getS1Closed().refresh().getValue());
+    //SmartDashboard.putBoolean("limitOn", limit.getS1Closed().refresh().getValue());
 
     pos.set(leverMotor.getPosition().getValueAsDouble()); //publish position of lever to network table
 
+    number = SmartDashboard.getNumber("GoToPos", 3.5);
+
+    if (number != lastnumber) {
+      lastnumber = number;
+      leverMotor.setControl(focThing.withPosition(number));
+
+    }
   }
 
 
