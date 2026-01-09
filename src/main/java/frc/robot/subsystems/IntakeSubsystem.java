@@ -36,13 +36,13 @@ public class IntakeSubsystem extends SubsystemBase {
   private TalonFX leverMotor = new TalonFX( /*insert numer */ 1, "can");
   //private CANdi limit = new CANdi(/*insert number */ 3);
   private boolean autoOn = false;
-  private final double upperLim = 3.5; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
+  private final double upperLim = 0.25; //check movearm to change value, 50 is just exorbitantly large random number, but check signage here
   private double magnVel = 0.05; //to reverse direction, just change 1 to -1
   DoublePublisher pos;
   TalonFXConfiguration PID = new TalonFXConfiguration();
   NetworkTableInstance inst;
   NetworkTable table;
-  private final double downPos = 1.0; //lower limit, in case angle of lever is lower. will be stopped by the limit anyway
+  private final double downPos = 0.0; //lower limit, in case angle of lever is lower. will be stopped by the limit anyway
   private boolean up = false; //current direction of arm
   CurrentLimitsConfigs currLim;
   private PositionTorqueCurrentFOC focThing;
@@ -62,10 +62,13 @@ public class IntakeSubsystem extends SubsystemBase {
     inst = NetworkTableInstance.getDefault();
     table = inst.getTable("data");
     pos = table.getDoubleTopic("pos").publish();
+    SmartDashboard.putNumber("GoToPos", 3.5);
+
     config();
     configNT();
     
   }
+
   public void configPID(double p, double i, double d, double ff) {
 
         Slot0Configs slot0Configs = new Slot0Configs(); //used to store and update PID values
@@ -83,10 +86,10 @@ public class IntakeSubsystem extends SubsystemBase {
             .getEntry("PIDF")
             .setDoubleArray(
                 new double[] {
-                    5,
-                    1,
-                    1,
-                    0.5
+                    45,
+                    15,
+                    0,
+                    0.0
                 }
             );
     NetworkTableInstance.getDefault().getTable("intakeDEBUG").addListener(
@@ -101,11 +104,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
 
   private void config(){
-    PID.Slot0.kP = 3;                                                //fix these guys somehow
-    PID.Slot0.kI = 3;                                                // config motors
+    PID.Slot0.kP = 45;                                                //fix these guys somehow
+    PID.Slot0.kI = 15;                                                // config motors
     // PID.Slot0.kV = 1;
-    PID.Slot0.kD = 0.01;
-    // PID.Slot0.kG = 0.02;
+    PID.Slot0.kD = 0.0;
+    PID.Slot0.kG = 0.0;
 
     PID.Slot1.kP = 0.2;    // velocity foc
     PID.Slot1.kI = 0.0;
