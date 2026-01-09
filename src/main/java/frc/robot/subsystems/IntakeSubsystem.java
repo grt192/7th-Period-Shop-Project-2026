@@ -124,8 +124,7 @@ public class IntakeSubsystem extends SubsystemBase {
     PID.MotionMagic.MotionMagicCruiseVelocity = 0.05;  // max speed (rotations/sec)
     PID.MotionMagic.MotionMagicAcceleration   = 1;  // how fast you ramp to that speed
     PID.MotionMagic.MotionMagicJerk           = 0.5;
-    PID.Feedback.SensorToMechanismRatio = 12;
-    
+    PID.Feedback.SensorToMechanismRatio = 12.0;
     leverMotor.getConfigurator().apply(PID);
     focThing = new PositionTorqueCurrentFOC(0).withSlot(0); //sets FOC object with PID values
     velFOCthing = new VelocityTorqueCurrentFOC(RotationsPerSecond.of(0)).withSlot(1);
