@@ -21,6 +21,7 @@ import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -231,6 +232,7 @@ public class IntakeSubsystem extends SubsystemBase {
       leverMotor.setControl(focThing.withPosition(number));
 
     }
+    Logger.recordOutput("Pivot_Position", leverMotor.getPosition().getValueAsDouble());
   }
 
 

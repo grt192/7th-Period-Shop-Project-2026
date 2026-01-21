@@ -4,13 +4,28 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+
+import edu.wpi.first.wpilibj.RobotBase;
+import org.littletonrobotics.junction.LoggedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
+
+  public enum MODE {
+    REAL,
+    SIM,
+    REPLAY
+  }
+
+  private static final MODE currentMODE = RobotBase.isReal() ? MODE.REAL : MODE.SIM;
 
   private final RobotContainer m_robotContainer;
 
@@ -19,6 +34,32 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
   }
+
+  @Override
+  public void robotInit() {
+
+    Logger.recordMetadata("IntakePivot", "MyRobot");
+    Logger.recordMetadata("BuildType", currentMODE.toString());
+
+    switch (currentMODE) {
+      case REAL:
+        Logger.addDataReceiver(new WPILOGWriter("/U/logs"));
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case SIM:
+        Logger.addDataReceiver(new WPILOGWriter("simlogs"));
+        break;
+
+      case REPLAY:
+        String logPath = LogFileUtil.findReplayLog();
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(
+            new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_replayed")));
+        break;
+    }
+  }
+
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
@@ -34,6 +75,13 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+
+    Logger.recordOutput("Robot/Enabled", isEnabled());
+    Logger.recordOutput("Robot/Mode",
+      isAutonomous() ? "Auto" :
+      isTeleop() ? "Teleop" :
+      isDisabled() ? "Disabled" : "Other");
+
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
